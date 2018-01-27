@@ -2494,6 +2494,8 @@ void G_StopDemo(void)
 
 	if (gamestate == GS_INTERMISSION)
 		Y_EndIntermission(); // cleanup
+	if (gamestate == GS_VOTING)
+		Y_EndVote(); // cleanup
 
 	G_SetGamestate(GS_NULL);
 	wipegamestate = GS_NULL;

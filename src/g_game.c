@@ -1804,6 +1804,9 @@ void G_DoLoadLevel(boolean resetplayer)
 	if (gamestate == GS_INTERMISSION)
 		Y_EndIntermission();
 
+	if (gamestate == GS_VOTING)
+		Y_EndVote();
+
 	// cleanup
 	if (titlemapinaction == TITLEMAP_LOADING)
 	{
@@ -2277,6 +2280,12 @@ void G_Ticker(boolean run)
 		case GS_INTERMISSION:
 			if (run)
 				Y_Ticker();
+			HU_Ticker();
+			break;
+
+		case GS_VOTING:
+			if (run)
+				Y_VoteTicker();
 			HU_Ticker();
 			break;
 
@@ -3661,7 +3670,7 @@ UINT32 G_TOLFlag(INT32 pgametype)
   *         has those flags.
   * \author Graue <graue@oceanbase.org>
   */
-static INT16 RandMap(UINT32 tolflags, INT16 pprevmap)
+INT16 RandMap(UINT32 tolflags, INT16 pprevmap)
 {
 	INT16 *okmaps = Z_Malloc(NUMMAPS * sizeof(INT16), PU_STATIC, NULL);
 	INT32 numokmaps = 0;
@@ -3919,7 +3928,7 @@ static void G_DoCompleted(void)
 	{
 		G_UpdateVisited();
 		G_HandleSaveLevel();
-		G_AfterIntermission();
+		G_AfterIntermission(false);
 	}
 	else
 	{
@@ -3931,7 +3940,7 @@ static void G_DoCompleted(void)
 }
 
 // See also F_EndCutscene, the only other place which handles intra-map/ending transitions
-void G_AfterIntermission(void)
+void G_AfterIntermission(boolean vote)
 {
 	Y_CleanupScreenBuffer();
 
@@ -3945,12 +3954,18 @@ void G_AfterIntermission(void)
 		gamecomplete = 1;
 
 	HU_ClearCEcho();
+	G_NextLevel();
 
 	if ((gametyperules & GTR_CUTSCENES) && mapheaderinfo[gamemap-1]->cutscenenum && !modeattacking && skipstats <= 1 && (gamecomplete || !(marathonmode & MA_NOCUTSCENES))) // Start a custom cutscene.
 		F_StartCustomCutscene(mapheaderinfo[gamemap-1]->cutscenenum-1, false, false);
 	else
 	{
-		if (nextmap < 1100-1)
+		if (cv_advancemap.value == 3 && !vote)
+		{
+			G_SetGamestate(GS_VOTING);
+			Y_StartVote();
+		}
+		else if (nextmap < 1100-1)
 			G_NextLevel();
 		else
 			G_EndGame();

@@ -2773,6 +2773,8 @@ static void CL_ConnectToServer(void)
 
 	if (gamestate == GS_INTERMISSION)
 		Y_EndIntermission(); // clean up intermission graphics etc
+	if (gamestate == GS_VOTING)
+		Y_EndVote();
 
 	DEBFILE(va("waiting %d nodes\n", doomcom->numnodes));
 	G_SetGamestate(GS_WAITINGPLAYERS);
@@ -4142,6 +4144,8 @@ void SV_StopServer(void)
 
 	if (gamestate == GS_INTERMISSION)
 		Y_EndIntermission();
+	if (gamestate == GS_VOTING)
+		Y_EndVote();
 	gamestate = wipegamestate = GS_NULL;
 
 	localtextcmd[0] = 0;
