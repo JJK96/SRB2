@@ -22,9 +22,9 @@ void Y_CleanupScreenBuffer(void);
 
 void Y_DetermineIntermissionType(void);
 
-void Y_StartVote(void);
-void Y_VoteTicker(void);
 void Y_VoteDrawer(void);
+void Y_VoteTicker(void);
+void Y_StartVote(void);
 void Y_EndVote(void);
 
 typedef enum

@@ -201,8 +201,12 @@ void G_ExitLevel(void);
 void G_NextLevel(void);
 void G_Continue(void);
 void G_UseContinue(void);
-void G_AfterIntermission(boolean vote);
+<<<<<<< HEAD
+void G_AfterIntermission(void);
 void G_EndGame(void); // moved from y_inter.c/h and renamed
+=======
+void G_AfterIntermission(boolean vote);
+>>>>>>> cc0c99640 (Work so far)
 
 void G_Ticker(boolean run);
 boolean G_Responder(event_t *ev);

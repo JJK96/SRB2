@@ -50,6 +50,7 @@ typedef enum
 	ga_worlddone,
 	ga_startcont,
 	ga_continued,
+	ga_startvote,
 } gameaction_t;
 
 extern gamestate_t gamestate;
