@@ -92,6 +92,8 @@ extern consvar_t cv_jumpshield, cv_watershield, cv_ringshield, cv_forceshield, c
 extern consvar_t cv_1up, cv_eggmanbox;
 extern consvar_t cv_recycler;
 
+extern consvar_t cv_votetime;
+
 extern consvar_t cv_itemfinder;
 
 extern consvar_t cv_inttime, cv_coopstarposts, cv_cooplives, cv_advancemap, cv_playersforexit, cv_exitmove;

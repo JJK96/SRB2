@@ -4676,7 +4676,7 @@ static void M_DrawGenericScrollMenu(void)
 
 static void M_DrawPauseMenu(void)
 {
-	if (!netgame && !multiplayer && (gamestate == GS_LEVEL || gamestate == GS_INTERMISSION))
+	if (!netgame && !multiplayer && (gamestate == GS_LEVEL || gamestate == GS_INTERMISSION || gamestate == GS_VOTING))
 	{
 		emblem_t *emblem_detail[3] = {NULL, NULL, NULL};
 		char emblem_text[3][20];
@@ -10410,7 +10410,7 @@ static void M_ModeAttackEndGame(INT32 choice)
 	(void)choice;
 	G_CheckDemoStatus(); // Cancel recording
 
-	if (gamestate == GS_LEVEL || gamestate == GS_INTERMISSION)
+	if (gamestate == GS_LEVEL || gamestate == GS_INTERMISSION || gamestate == GS_VOTING)
 		Command_ExitGame_f();
 
 	M_StartControlPanel();

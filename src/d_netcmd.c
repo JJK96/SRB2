@@ -281,6 +281,9 @@ consvar_t cv_bombshield =    CVAR_INIT ("tv_bombshield",    "5", CV_SAVE|CV_NETV
 consvar_t cv_1up =           CVAR_INIT ("tv_1up",           "5", CV_SAVE|CV_NETVAR|CV_CHEAT, chances_cons_t, NULL);
 consvar_t cv_eggmanbox =     CVAR_INIT ("tv_eggman",        "5", CV_SAVE|CV_NETVAR|CV_CHEAT, chances_cons_t, NULL);
 
+static CV_PossibleValue_t votetime_cons_t[] = {{10, "MIN"}, {3600, "MAX"}, {0, NULL}};
+consvar_t cv_votetime = CVAR_INIT("votetime", "20", CV_NETVAR, votetime_cons_t, NULL);
+
 consvar_t cv_ringslinger = CVAR_INIT ("ringslinger", "No", CV_NETVAR|CV_NOSHOWHELP|CV_CALL|CV_CHEAT, CV_YesNo, Ringslinger_OnChange);
 consvar_t cv_gravity = CVAR_INIT ("gravity", "0.5", CV_RESTRICT|CV_FLOAT|CV_CALL, NULL, Gravity_OnChange);
 
@@ -2136,7 +2139,7 @@ static void Command_Pause(void)
 
 	if (cv_pause.value || server || (IsPlayerAdmin(consoleplayer)))
 	{
-		if (modeattacking || !(gamestate == GS_LEVEL || gamestate == GS_INTERMISSION))
+		if (modeattacking || !(gamestate == GS_LEVEL || gamestate == GS_INTERMISSION || gamestate == GS_VOTING))
 		{
 			CONS_Printf(M_GetText("You can't pause here.\n"));
 			return;
@@ -2199,7 +2202,7 @@ static void Command_Suicide(void)
 	UINT8 buf[4];
 	UINT8 *cp = buf;
 
-	if (!(gamestate == GS_LEVEL || gamestate == GS_INTERMISSION))
+	if (!(gamestate == GS_LEVEL || gamestate == GS_INTERMISSION || gamestate == GS_VOTING))
 	{
 		CONS_Printf(M_GetText("You must be in a level to use this.\n"));
 		return;
@@ -4045,7 +4048,7 @@ static void TeamScramble_OnChange(void)
 	boolean success = false;
 
 	// Don't trigger outside level or intermission!
-	if (!(gamestate == GS_LEVEL || gamestate == GS_INTERMISSION))
+	if (!(gamestate == GS_LEVEL || gamestate == GS_INTERMISSION || gamestate == GS_VOTING))
 		return;
 
 	if (!cv_teamscramble.value)
@@ -4299,7 +4302,7 @@ void Command_ExitGame_f(void)
 
 void Command_Retry_f(void)
 {
-	if (!(gamestate == GS_LEVEL || gamestate == GS_INTERMISSION))
+	if (!(gamestate == GS_LEVEL || gamestate == GS_INTERMISSION || gamestate == GS_VOTING))
 		CONS_Printf(M_GetText("You must be in a level to use this.\n"));
 	else if (netgame || multiplayer)
 		CONS_Printf(M_GetText("This only works in single player.\n"));
