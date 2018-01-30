@@ -201,12 +201,8 @@ void G_ExitLevel(void);
 void G_NextLevel(void);
 void G_Continue(void);
 void G_UseContinue(void);
-<<<<<<< HEAD
-void G_AfterIntermission(void);
-void G_EndGame(void); // moved from y_inter.c/h and renamed
-=======
 void G_AfterIntermission(boolean vote);
->>>>>>> cc0c99640 (Work so far)
+void G_EndGame(void); // moved from y_inter.c/h and renamed
 
 void G_Ticker(boolean run);
 boolean G_Responder(event_t *ev);
@@ -255,6 +251,5 @@ FUNCMATH INT32 G_TicsToMilliseconds(tic_t tics);
 
 // Don't split up TOL handling
 UINT32 G_TOLFlag(INT32 pgametype);
-INT16 RandMap(INT16 tolflags, INT16 pprevmap);
 
 #endif

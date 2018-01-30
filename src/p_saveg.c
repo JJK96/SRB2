@@ -3976,6 +3976,9 @@ static void P_NetArchiveMisc(void)
 	WRITEINT16(save_p, lastmap);
 	WRITEUINT16(save_p, bossdisabled);
 
+	for (i = 0; i < 4; i++)
+		WRITEINT16(save_p, votelevels[i]);
+
 	WRITEUINT16(save_p, emeralds);
 	{
 		UINT8 globools = 0;
@@ -4062,6 +4065,9 @@ static inline boolean P_NetUnArchiveMisc(void)
 	ssspheres = READUINT32(save_p);
 	lastmap = READINT16(save_p);
 	bossdisabled = READUINT16(save_p);
+
+	for (i = 0; i < 4; i++)
+		votelevels[i] = READINT16(save_p);
 
 	emeralds = READUINT16(save_p);
 	{
