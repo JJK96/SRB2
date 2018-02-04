@@ -255,7 +255,6 @@ extern UINT32 ssspheres; //  Total # of spheres in a level
 
 // Fun extra stuff
 extern INT16 lastmap; // Last level you were at (returning from special stages).
-extern INT16 votelevels[4]; // srb2kart
 extern mobj_t *redflag, *blueflag; // Pointers to physical flags
 extern mapthing_t *rflagpoint, *bflagpoint; // Pointers to the flag spawn locations
 #define GF_REDFLAG 1
@@ -613,6 +612,10 @@ extern INT16 scrambletotal; //for CTF team scramble
 extern INT16 scramblecount; //for CTF team scramble
 
 extern INT32 cheats;
+
+extern INT16 votelevels[4];
+extern INT8 votes[MAXPLAYERS];
+extern INT8 pickedvote;
 
 extern tic_t hidetime;
 
