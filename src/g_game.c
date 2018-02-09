@@ -414,22 +414,6 @@ consvar_t cv_cam_lockonboss[2] = {
 	CVAR_INIT ("cam2_lockaimassist", "Bosses", CV_SAVE, lockedassist_cons_t, NULL),
 };
 
-typedef enum
-{
-	AXISNONE = 0,
-	AXISTURN,
-	AXISMOVE,
-	AXISLOOK,
-	AXISSTRAFE,
-
-	AXISDIGITAL, // axes below this use digital deadzone
-
-	AXISJUMP,
-	AXISSPIN,
-	AXISFIRE,
-	AXISFIRENORMAL,
-} axis_input_e;
-
 consvar_t cv_turnaxis = CVAR_INIT ("joyaxis_turn", "X-Rudder", CV_SAVE, joyaxis_cons_t, NULL);
 consvar_t cv_moveaxis = CVAR_INIT ("joyaxis_move", "Y-Axis", CV_SAVE, joyaxis_cons_t, NULL);
 consvar_t cv_sideaxis = CVAR_INIT ("joyaxis_side", "X-Axis", CV_SAVE, joyaxis_cons_t, NULL);
@@ -851,7 +835,7 @@ INT16 G_SoftwareClipAimingPitch(INT32 *aiming)
 	return (INT16)((*aiming)>>16);
 }
 
-static INT32 JoyAxis(axis_input_e axissel)
+INT32 JoyAxis(axis_input_e axissel)
 {
 	INT32 retaxis;
 	INT32 axisval;

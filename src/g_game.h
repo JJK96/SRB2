@@ -87,6 +87,22 @@ typedef enum
 } lockassist_e;
 
 
+typedef enum
+{
+	AXISNONE = 0,
+	AXISTURN,
+	AXISMOVE,
+	AXISLOOK,
+	AXISSTRAFE,
+
+	AXISDIGITAL, // axes below this use digital deadzone
+
+	AXISJUMP,
+	AXISSPIN,
+	AXISFIRE,
+	AXISFIRENORMAL,
+} axis_input_e;
+
 // mouseaiming (looking up/down with the mouse or keyboard)
 #define KB_LOOKSPEED (1<<25)
 #define MAXPLMOVE (50)
@@ -111,6 +127,8 @@ INT16 G_SoftwareClipAimingPitch(INT32 *aiming);
 
 extern angle_t localangle, localangle2;
 extern INT32 localaiming, localaiming2; // should be an angle_t but signed
+
+INT32 JoyAxis(axis_input_e axissel, UINT8 p);
 
 //
 // GAME
