@@ -247,7 +247,7 @@ INT16 scramblecount; //for CTF team scramble
 
 INT32 cheats; //for multiplayer cheat commands
 
-INT16 randmapbuffer[NUMMAPS-4]; // Buffer for maps RandMap is allowed to roll
+static INT16 randmapbuffer[NUMMAPS]; // Buffer for maps RandMap is allowed to roll
 
 // Voting system
 INT16 votelevels[4]; // Levels that were rolled by the host
@@ -3701,7 +3701,7 @@ INT16 G_RandMap(UINT32 tolflags, INT16 pprevmap, boolean ignorebuffer)
 
 		if (!ignorebuffer)
 		{
-			for (bufx = 0; bufx < NUMMAPS-4; bufx++)
+			for (bufx = 0; bufx < NUMMAPS; bufx++)
 			{
 				if (randmapbuffer[bufx] == -1) // Rest of buffer SHOULD be empty
 					break;
@@ -3723,13 +3723,13 @@ INT16 G_RandMap(UINT32 tolflags, INT16 pprevmap, boolean ignorebuffer)
 			return G_RandMap(tolflags, pprevmap, true); // If there's no matches, (An incredibly silly function chain, buuut... :V)
 
 		ix = 0; // Sorry, none match. You get MAP01.
-		for (bufx = 0; bufx < NUMMAPS-4; bufx++)
+		for (bufx = 0; bufx < NUMMAPS; bufx++)
 			randmapbuffer[bufx] = -1; // if we're having trouble finding a map we should probably clear it
 	}
 	else
 	{
 		ix = okmaps[M_RandomKey(numokmaps)];
-		for (bufx = NUMMAPS-4; bufx > 0; bufx--)
+		for (bufx = NUMMAPS; bufx > 0; bufx--)
 			randmapbuffer[bufx] = randmapbuffer[bufx-1];
 		randmapbuffer[0] = ix;
 	}
@@ -3952,9 +3952,9 @@ static void G_DoCompleted(void)
 
 	automapactive = false;
 
-	if (randmapbuffer[TOLMaps(G_TOLFlag(gametype))-4] != -1) // filled up, so lets clear it
+	if (randmapbuffer[TOLMaps(G_TOLFlag(gametype))-5] != -1) // we're getting pretty full, so lets clear it
 	{
-		for (i = 0; i < NUMMAPS-4; i++)
+		for (i = 0; i < NUMMAPS; i++)
 			randmapbuffer[i] = -1;
 	}
 
