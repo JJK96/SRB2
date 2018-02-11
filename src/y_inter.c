@@ -186,11 +186,13 @@ typedef struct
 {
 	INT8 selection;
 	UINT8 delay;
+	UINT8 ranim;
+	UINT8 rtics;
+	UINT8 roffset;
 } y_voteclient;
 
 static y_votelvlinfo levelinfo[4];
 static y_voteclient voteclient;
-static UINT8 randomanim = 0;
 static INT32 votetic;
 static INT32 voteendtic = -1;
 static patch_t *cursor = NULL;
@@ -2316,12 +2318,12 @@ void Y_VoteDrawer(void)
 		{
 			patch_t *pic;
 
-			if (votes[i] == 3 && (i != pickedvote || voteendtic-votetic > 3*TICRATE))
+			if (votes[i] == 3 && (i != pickedvote || voteendtic == -1))
 				pic = randomlvl;
 			else
 				pic = levelinfo[votes[i]].pic;
 
-			if (!timer && i == randomanim)
+			if (!timer && i == voteclient.ranim)
 			{
 				V_DrawScaledPatch(x-18, y+9, V_SNAPTOLEFT, cursor);
 				if (votetic % 4 > 1)
@@ -2407,15 +2409,9 @@ void Y_VoteTicker(void)
 		timer = 0;
 
 		if (voteendtic == -1)
-			return;
-
-		if (voteendtic-votetic > 3*TICRATE)
 		{
 			UINT8 tempvotes[MAXPLAYERS];
 			UINT8 numvotes = 0;
-
-			if (votetic % 5)
-				return;
 
 			for (i = 0; i < MAXPLAYERS; i++)
 			{
@@ -2425,15 +2421,25 @@ void Y_VoteTicker(void)
 				numvotes++;
 			}
 
-			randomanim = tempvotes[((pickedvote + ((voteendtic-votetic) / 5)) % numvotes)];
-			S_StartSound(NULL, sfx_s3k5b);
+			voteclient.rtics--;
+
+			if (voteclient.rtics <= 0)
+			{
+				voteclient.roffset++;
+				voteclient.rtics = min(TICRATE/2, (voteclient.roffset/3)+1);
+				S_StartSound(NULL, sfx_s3k5b);
+			}
+
+			voteclient.ranim = tempvotes[((pickedvote + voteclient.roffset) % numvotes)];
+
+			if (voteclient.ranim == pickedvote && voteclient.roffset >= 30)
+			{
+				voteendtic = votetic + (4*TICRATE);
+				S_StartSound(NULL, sfx_s3k63);
+			}
 		}
 		else
-		{
-			randomanim = pickedvote;
-			if (voteendtic-votetic == 3*TICRATE-1)
-				S_StartSound(NULL, sfx_s3k63);
-		}
+			voteclient.ranim = pickedvote;
 	}
 	else
 	{
@@ -2525,10 +2531,12 @@ void Y_StartVote(void)
 
 	timer = cv_votetime.value*TICRATE;
 	pickedvote = -1;
-	randomanim = 0;
 
 	voteclient.selection = 0;
 	voteclient.delay = 0;
+	voteclient.ranim = 0;
+	voteclient.rtics = 1;
+	voteclient.roffset = 0;
 
 	for (i = 0; i < MAXPLAYERS; i++)
 		votes[i] = -1;
@@ -2614,7 +2622,7 @@ void Y_SetupVoteFinish(INT8 pick, INT8 level)
 
 	if (voteendtic == -1)
 	{
-		UINT8 numplayers = 0;
+		/*UINT8 numplayers = 0;
 
 		if (splitscreen)
 			numplayers = 1;
@@ -2631,6 +2639,6 @@ void Y_SetupVoteFinish(INT8 pick, INT8 level)
 		if (numplayers > 1)
 			voteendtic = votetic+(6*TICRATE);
 		else
-			voteendtic = votetic+(3*TICRATE);
+			voteendtic = votetic+(3*TICRATE);*/
 	}
 }
