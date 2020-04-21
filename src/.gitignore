@@ -1,2 +1,6 @@
 /cscope.out
 /srb2wii
+compile_commands.json
+.ccls-cache
+tags
+credentials.h
