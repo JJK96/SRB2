@@ -3677,6 +3677,7 @@ static void G_UpdateVisited(void)
 //
 static void G_DoCompleted(void)
 {
+    speedrun_map_completed();
 	INT32 i;
 	boolean spec = G_IsSpecialStage(gamemap);
 

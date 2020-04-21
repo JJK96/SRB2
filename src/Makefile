@@ -403,6 +403,20 @@ ifdef ZDEBUG
 	CPPFLAGS+=-DZDEBUG
 endif
 
+CFLAGS += -I/usr/include/mysql
+LDFLAGS += -L/usr/local/mysql/lib
+LIBS += -lmysqlclient
+
+ifdef USERNAME
+    CFLAGS += -DUSERNAME=${USERNAME}
+endif
+ifdef PASSWORD
+    CFLAGS += -DPASSWORD=${PASSWORD}
+endif
+ifdef DATABASE
+    CFLAGS += -DDATABASE=${DATABASE}
+endif
+
 OPTS+=$(CPPFLAGS)
 
 # default EXENAME if all else fails
@@ -485,6 +499,7 @@ OBJS:=$(i_main_o) \
 		$(OBJDIR)/lzf.o	     \
 		$(OBJDIR)/vid_copy.o \
 		$(OBJDIR)/b_bot.o \
+		$(OBJDIR)/speedrun.o \
 		$(i_cdmus_o)    \
 		$(i_net_o)      \
 		$(i_system_o)   \
