@@ -198,9 +198,9 @@ int get_time(MYSQL* con, int mapnum, char* username, char* skin)
     }
 
     int time;
-    bind[1].buffer = (char *) &time;
+    bind[2].buffer = (char *) &time;
 
-    if (mysql_stmt_bind_result(stmt, &bind[1])) {
+    if (mysql_stmt_bind_result(stmt, &bind[2])) {
         finish_with_error(con);
     }
 
@@ -292,6 +292,7 @@ void process_time(MYSQL *con, int playernum, int mapnum) {
     } else {
         best_time = res;
         if (time < best_time) {
+            printf("Username: %s, map_id: %d, skin: %s, old_time: %d, new_time: %d\r\n", username, mapnum, skin, best_time, time);
             //Need to update
             update_score(con, mapnum, username, skin, time);
         }
