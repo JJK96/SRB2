@@ -14,7 +14,7 @@
 #define GET_MAP "select * from maps where id = %d"
 #define INSERT_MAP "insert into maps (id, name) values (?, ?)"
 #define GET_SCORE "select time from highscores where username = ? and skin = ? and map_id = ?"
-#define INSERT_SCORE "insert into highscores (username, skin, map_id, time, time_string) values (?, ?, ?, ?, ?)"
+#define INSERT_SCORE "insert into highscores (time, time_string, username, skin, map_id) values (?, ?, ?, ?, ?)"
 #define UPDATE_SCORE "update highscores set time = ?, time_string = ? where username = ? and skin = ? and map_id = ?"
 
 // Exits with an error
@@ -37,25 +37,31 @@ char *time_to_string(int time)
     return time_string;
 }
 
-// Insert the score in the database
-// executed if a previous time was found
-void update_score(MYSQL *con, int mapnum, char* username, char* skin, int time)
+// Insert score into the database
+void insert_score(MYSQL *con, int mapnum, char* username, char* skin, int time, bool time_found)
 {
-    // setup the statement handler and the statement's binds
+    // setup the statement handler and statement binds
     MYSQL_STMT* stmt = mysql_stmt_init(con);
     MYSQL_BIND bind[5];
 
     // reset the binds
     memset(bind, 0, sizeof(bind));
-    
     unsigned long username_length = strlen(username);
     unsigned long skin_length = strlen(skin);
     char * time_string = time_to_string(time);
-    unsigned long time_string_length = strlen(time_string);
+    unsigned long  time_string_length = strlen(time_string);
 
-    // prepare the statement
-    if (mysql_stmt_prepare(stmt, UPDATE_SCORE, strlen(UPDATE_SCORE))) {
-        finish_with_error(con);
+    // change the statement based on if another time was found or not
+    if (time_found) {
+        // a previous time was found
+        if (mysql_stmt_prepare(stmt, UPDATE_SCORE, strlen(UPDATE_SCORE))) {
+            finish_with_error(con);
+        }
+    } else {
+        // no previous time was found
+        if (mysql_stmt_prepare(stmt, INSERT_SCORE, strlen(INSERT_SCORE))) {
+            finish_with_error(con);
+        }
     }
 
     // bind the new time(int)
@@ -78,7 +84,7 @@ void update_score(MYSQL *con, int mapnum, char* username, char* skin, int time)
     bind[2].is_null = 0;
     bind[2].length = &username_length;
 
-    // bind the player's character
+    // bind the player's current character
     bind[3].buffer_type = MYSQL_TYPE_STRING;
     bind[3].buffer = skin;
     bind[3].buffer_length = skin_length;
@@ -90,79 +96,6 @@ void update_score(MYSQL *con, int mapnum, char* username, char* skin, int time)
     bind[4].buffer = (char *)&mapnum;
     bind[4].is_null = 0;
     bind[4].length = 0;
-
-    // execute the statement
-    if (mysql_stmt_bind_param(stmt, bind)) {
-        finish_with_error(con);
-    }
-    if (mysql_stmt_execute(stmt)) {
-        finish_with_error(con);
-    }
-
-    // close the statement handler
-    if (mysql_stmt_close(stmt)) {
-        fprintf(stderr, "%s\n", mysql_error(con));
-        finish_with_error(con);
-    }
-
-    // deallocate the memory for the time(string mm:ss.cc)
-    free(time_string);
-
-}
-
-// Insert score into the database 
-// executed if no time was found
-void insert_score(MYSQL *con, int mapnum, char* username, char* skin, int time)
-{
-    // setup the statement handler and statement binds
-    MYSQL_STMT* stmt = mysql_stmt_init(con);
-    MYSQL_BIND bind[5];
-
-    // reset the binds
-    memset(bind, 0, sizeof(bind));
-    
-    unsigned long username_length = strlen(username);
-    unsigned long skin_length = strlen(skin);
-    char * time_string = time_to_string(time);
-    unsigned long  time_string_length = strlen(time_string);
-
-    // prepare the statement
-    if (mysql_stmt_prepare(stmt, INSERT_SCORE, strlen(INSERT_SCORE))) {
-        finish_with_error(con);
-    }
-
-    // bind the player's username
-    bind[0].buffer_type = MYSQL_TYPE_STRING;
-    bind[0].buffer = username;
-    bind[0].buffer_length = username_length;
-    bind[0].is_null = 0;
-    bind[0].length = &username_length;
-
-    // bind the player's current character
-    bind[1].buffer_type = MYSQL_TYPE_STRING;
-    bind[1].buffer = skin;
-    bind[1].buffer_length = skin_length;
-    bind[1].is_null = 0;
-    bind[1].length = &skin_length;
-
-    // bind the map's number
-    bind[2].buffer_type = MYSQL_TYPE_LONG;
-    bind[2].buffer = (char *)&mapnum;
-    bind[2].is_null = 0;
-    bind[2].length = 0;
-
-    // bind the new time(int)
-    bind[3].buffer_type = MYSQL_TYPE_LONG;
-    bind[3].buffer = (char *)&time;
-    bind[3].is_null = 0;
-    bind[3].length = 0;
-
-    // bind the new time(string mm:ss.cc)
-    bind[4].buffer_type = MYSQL_TYPE_STRING;
-    bind[4].buffer = time_string;
-    bind[4].buffer_length = time_string_length;
-    bind[4].is_null = 0;
-    bind[4].length = &time_string_length;
 
     // execute the statement
     if (mysql_stmt_bind_param(stmt, bind)) {
@@ -342,14 +275,14 @@ void process_time(MYSQL *con, int playernum, int mapnum) {
     // if no time was found
     if (res == -1) {
         // insert the current time
-        insert_score(con, mapnum, username, skin, time);
+        insert_score(con, mapnum, username, skin, time, false);
     } else {
         best_time = res;
         // if the new time is lower than the best time
         if (time < best_time) {
             printf("Username: %s, map_id: %d, skin: %s, old_time: %d, new_time: %d\r\n", username, mapnum, skin, best_time, time);
             // update the time
-            update_score(con, mapnum, username, skin, time);
+            insert_score(con, mapnum, username, skin, time, true);
         }
     }
 }
@@ -399,5 +332,4 @@ void speedrun_map_completed()
     
     // closes the connection
     mysql_close(con);
-
 }
