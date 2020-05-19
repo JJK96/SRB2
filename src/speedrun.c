@@ -40,7 +40,7 @@ char *time_to_string(int time)
 // Insert score into the database
 void insert_score(MYSQL *con, int mapnum, char* username, char* skin, int time, bool time_found)
 {
-    // setup the statement handler and the statement's binds
+    // setup the statement handler and statement binds
     MYSQL_STMT* stmt = mysql_stmt_init(con);
     MYSQL_BIND bind[5];
 
@@ -49,7 +49,7 @@ void insert_score(MYSQL *con, int mapnum, char* username, char* skin, int time, 
     unsigned long username_length = strlen(username);
     unsigned long skin_length = strlen(skin);
     char * time_string = time_to_string(time);
-    unsigned long time_string_length = strlen(time_string);
+    unsigned long  time_string_length = strlen(time_string);
 
     // change the statement based on if another time was found or not
     if (time_found) {
@@ -84,7 +84,7 @@ void insert_score(MYSQL *con, int mapnum, char* username, char* skin, int time, 
     bind[2].is_null = 0;
     bind[2].length = &username_length;
 
-    // bind the player's character
+    // bind the player's current character
     bind[3].buffer_type = MYSQL_TYPE_STRING;
     bind[3].buffer = skin;
     bind[3].buffer_length = skin_length;
@@ -288,7 +288,8 @@ void process_time(MYSQL *con, int playernum, int mapnum) {
 }
 
 // Called when the race has finished
-void speedrun_map_completed() {
+void speedrun_map_completed()
+{
     // create the mysql handler
     MYSQL *con = mysql_init(NULL);
 
@@ -321,15 +322,14 @@ void speedrun_map_completed() {
     insert_map(con, mapnum, mapname);
 
     //for every player
-	for (int playernum = 0; playernum < MAXPLAYERS; playernum++) {
-		// if the player is not in game, is a spectator or is dead: skip it
-        	if (!playeringame[playernum] || players[playernum].spectator || players[playernum].pflags & PF_GAMETYPEOVER)
-            		continue;
-    		// else save its time
-        	process_time(con, playernum, mapnum);
-	}
+    for (int playernum = 0; playernum < MAXPLAYERS; playernum++) {
+        // if the player is not in game, is a spectator or is dead: skip it
+	if (!playeringame[playernum] || players[playernum].spectator || players[playernum].pflags & PF_GAMETYPEOVER)
+	    continue;
+	// else save its time
+	process_time(con, playernum, mapnum);
+    }
     
     // closes the connection
     mysql_close(con);
-
 }
