@@ -5,6 +5,7 @@
 #include "r_things.h"
 #include <stdio.h>
 #include <mysql.h>
+#include <stdbool.h>
 #include "credentials.h"
 
 #define QUERY_LEN 100
