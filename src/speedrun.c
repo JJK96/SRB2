@@ -325,10 +325,13 @@ void speedrun_map_completed()
     //for every player
     for (int playernum = 0; playernum < MAXPLAYERS; playernum++) {
         // if the player is not in game, is a spectator or is dead: skip it
-	if (!playeringame[playernum] || players[playernum].spectator || players[playernum].pflags & PF_GAMETYPEOVER)
-	    continue;
-	// else save its time
-	process_time(con, playernum, mapnum);
+    	if (!playeringame[playernum] 
+        	  || players[playernum].spectator 
+        	  || players[playernum].pflags & PF_GAMETYPEOVER 
+        	  || players[playernum].laps < (unsigned)cv_numlaps.value)
+    	    continue;
+    	// else save its time
+    	process_time(con, playernum, mapnum);
     }
     
     // closes the connection
