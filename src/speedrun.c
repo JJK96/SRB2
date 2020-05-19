@@ -25,7 +25,7 @@ void finish_with_error(MYSQL *con)
   //exit(1);
 }
 
-// Converts the time from tics into a string mm/ss/cc
+// Converts the time from tics into a string mm:ss.cc
 char *time_to_string(int time)
 {
     char *time_string = malloc(TIME_STRING_LEN);
@@ -37,7 +37,8 @@ char *time_to_string(int time)
     return time_string;
 }
 
-// Insert the score in the database(if a previous time was found)
+// Insert the score in the database
+// executed if a previous time was found
 void update_score(MYSQL *con, int mapnum, char* username, char* skin, int time)
 {
     // setup the statement handler and the statement's binds
@@ -46,6 +47,7 @@ void update_score(MYSQL *con, int mapnum, char* username, char* skin, int time)
 
     // reset the binds
     memset(bind, 0, sizeof(bind));
+    
     unsigned long username_length = strlen(username);
     unsigned long skin_length = strlen(skin);
     char * time_string = time_to_string(time);
@@ -62,7 +64,7 @@ void update_score(MYSQL *con, int mapnum, char* username, char* skin, int time)
     bind[0].is_null = 0;
     bind[0].length = 0;
 
-    // bind the new time(string mm/ss/cc)
+    // bind the new time(string mm:ss.cc)
     bind[1].buffer_type = MYSQL_TYPE_STRING;
     bind[1].buffer = time_string;
     bind[1].buffer_length = time_string_length;
@@ -103,12 +105,13 @@ void update_score(MYSQL *con, int mapnum, char* username, char* skin, int time)
         finish_with_error(con);
     }
 
-    // deallocate the memory for the time(string mm/ss/cc)
+    // deallocate the memory for the time(string mm:ss.cc)
     free(time_string);
 
 }
 
-// Insert score into the database (if no time was found)
+// Insert score into the database 
+// executed if no time was found
 void insert_score(MYSQL *con, int mapnum, char* username, char* skin, int time)
 {
     // setup the statement handler and statement binds
@@ -117,6 +120,7 @@ void insert_score(MYSQL *con, int mapnum, char* username, char* skin, int time)
 
     // reset the binds
     memset(bind, 0, sizeof(bind));
+    
     unsigned long username_length = strlen(username);
     unsigned long skin_length = strlen(skin);
     char * time_string = time_to_string(time);
@@ -153,7 +157,7 @@ void insert_score(MYSQL *con, int mapnum, char* username, char* skin, int time)
     bind[3].is_null = 0;
     bind[3].length = 0;
 
-    // bind the new time(string mm/ss/cc)
+    // bind the new time(string mm:ss.cc)
     bind[4].buffer_type = MYSQL_TYPE_STRING;
     bind[4].buffer = time_string;
     bind[4].buffer_length = time_string_length;
@@ -174,7 +178,7 @@ void insert_score(MYSQL *con, int mapnum, char* username, char* skin, int time)
         finish_with_error(con);
     }
 
-    // deallocate the memory for the time(string mm/ss/cc)
+    // deallocate the memory for the time(string mm:ss.cc)
     free(time_string);
 
 }
@@ -385,13 +389,13 @@ void speedrun_map_completed()
     insert_map(con, mapnum, mapname);
 
     //for every player
-	for (int playernum = 0; playernum < MAXPLAYERS; playernum++) {
-		// if the player is not in game, is a spectator or is dead: skip it
-        if (!playeringame[playernum] || players[playernum].spectator || players[playernum].pflags & PF_GAMETYPEOVER)
-            continue;
-    	// else save its time
-        process_time(con, playernum, mapnum);
-	}
+    for (int playernum = 0; playernum < MAXPLAYERS; playernum++) {
+        // if the player is not in game, is a spectator or is dead: skip it
+	if (!playeringame[playernum] || players[playernum].spectator || players[playernum].pflags & PF_GAMETYPEOVER)
+	    continue;
+	// else save its time
+	process_time(con, playernum, mapnum);
+    }
     
     // closes the connection
     mysql_close(con);
