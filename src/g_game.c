@@ -47,6 +47,7 @@
 #include "m_cond.h" // condition sets
 
 #include "lua_hud.h"
+#include "speedrun.h"
 
 gameaction_t gameaction;
 gamestate_t gamestate = GS_NULL;

@@ -38,7 +38,6 @@
 #include "lua_hook.h" // LUAh_LinedefExecute
 #include "f_finale.h" // control text prompt
 #include "r_skins.h" // skins
-#include "speedrun.h"
 
 #ifdef HW3SOUND
 #include "hardware/hw3sound.h"
