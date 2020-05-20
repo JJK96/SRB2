@@ -15,8 +15,8 @@
 #define GET_MAP "select * from maps where id = %d"
 #define INSERT_MAP "insert into maps (id, name) values (?, ?)"
 #define GET_SCORE "select time from highscores where username = ? and skin = ? and map_id = ?"
-#define INSERT_SCORE "insert into highscores (time, time_string, username, skin, map_id) values (?, ?, ?, ?, ?)"
-#define UPDATE_SCORE "update highscores set time = ?, time_string = ? where username = ? and skin = ? and map_id = ?"
+#define INSERT_SCORE "insert into highscores (time, time_string, username, skin, map_id, datetime) values (?, ?, ?, ?, ?, NOW())"
+#define UPDATE_SCORE "update highscores set time = ?, time_string = ?, datetime = NOW() where username = ? and skin = ? and map_id = ?"
 
 // Exits with an error
 void finish_with_error(MYSQL *con)
