@@ -889,6 +889,11 @@ static void CON_InputDelChar(void)
 // ----
 //
 
+boolean CON_AcceptInput(void)
+{
+	return consoleready;
+}
+
 // Handles console key input
 //
 boolean CON_Responder(event_t *ev)
