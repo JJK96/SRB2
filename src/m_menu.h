@@ -484,6 +484,7 @@ UINT16 M_GetColorBefore(UINT16 color);
 UINT16 M_GetColorAfter(UINT16 color);
 void M_InitPlayerSetupColors(void);
 void M_FreePlayerSetupColors(void);
+void M_RefreshPauseMenu(void);
 
 // These defines make it a little easier to make menus
 #define DEFAULTMENUSTYLE(id, header, source, prev, x, y)\

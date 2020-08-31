@@ -92,6 +92,10 @@
 int    VERSION;
 int SUBVERSION;
 
+#ifdef HAVE_DISCORDRPC
+#include "discord.h"
+#endif
+
 // platform independant focus loss
 UINT8 window_notinfocus = false;
 
@@ -874,6 +878,10 @@ void D_SRB2Loop(void)
 #endif
 
 		LUA_Step();
+
+#ifdef HAVE_DISCORDRPC
+		Discord_RunCallbacks();
+#endif
 	}
 }
 
@@ -1043,6 +1051,21 @@ static void ChangeDirForUrlHandler(void)
 // ==========================================================================
 // Identify the SRB2 version, and IWAD file to use.
 // ==========================================================================
+
+static boolean AddIWAD(void)
+{
+	char * path = va(pandf,srb2path,"srb2.srb");
+
+	if (FIL_ReadFileOK(path))
+	{
+		D_AddFile(path, startupwadfiles);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
 
 static void IdentifyVersion(void)
 {
@@ -1670,6 +1693,10 @@ void D_SRB2Main(void)
 		if (!P_LoadLevel(false))
 			I_Quit(); // fail so reset game stuff
 	}
+
+#ifdef HAVE_DISCORDRPC
+	DRPC_Init();
+#endif
 }
 
 const char *D_Home(void)
