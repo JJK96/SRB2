@@ -391,6 +391,7 @@ INT16 gametypecount = (GT_CTF + 1);
 
 boolean splitscreen = false;
 boolean circuitmap = false;
+
 INT32 adminplayers[MAXPLAYERS];
 
 /// \warning Keep this up-to-date if you add/remove/rename net text commands
@@ -920,8 +921,8 @@ void D_RegisterClientCommands(void)
 	CV_RegisterVar(&cv_discordrp);
 	CV_RegisterVar(&cv_discordstreamer);
 	CV_RegisterVar(&cv_discordasks);
-	CV_RegisterVar(&cv_discordinvites);
 #endif
+	CV_RegisterVar(&cv_discordinvites);
 }
 
 /** Checks if a name (as received from another player) is okay.

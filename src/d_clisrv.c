@@ -2018,12 +2018,7 @@ static boolean SV_SendServerConfig(INT32 node)
 
 	netbuffer->u.servercfg.maxplayer = (UINT8)(min((dedicated ? MAXPLAYERS-1 : MAXPLAYERS), cv_maxplayers.value));
 	netbuffer->u.servercfg.allownewplayer = cv_allownewplayer.value;
-
-#ifdef HAVE_DISCORDRPC
 	netbuffer->u.servercfg.discordinvites = (boolean)cv_discordinvites.value;
-#else
-	netbuffer->u.servercfg.discordinvites = false;
-#endif
 
 	memcpy(netbuffer->u.servercfg.server_context, server_context, 8);
 	op = p = netbuffer->u.servercfg.varlengthinputs;
@@ -3715,6 +3710,11 @@ static CV_PossibleValue_t resynchattempts_cons_t[] = {{1, "MIN"}, {20, "MAX"}, {
 consvar_t cv_resynchattempts = CVAR_INIT ("resynchattempts", "10", CV_SAVE|CV_NETVAR, resynchattempts_cons_t, NULL);
 consvar_t cv_blamecfail = CVAR_INIT ("blamecfail", "Off", CV_SAVE|CV_NETVAR, CV_OnOff, NULL);
 
+// Here for dedicated servers
+static CV_PossibleValue_t discordinvites_cons_t[] = {{0, "Admins Only"}, {1, "Everyone"}, {0, NULL}};
+consvar_t cv_discordinvites = CVAR_INIT ("discordinvites", "Everyone", CV_SAVE|CV_CALL, discordinvites_cons_t, Joinable_OnChange);
+
+
 // max file size to send to a player (in kilobytes)
 static CV_PossibleValue_t maxsend_cons_t[] = {{0, "MIN"}, {51200, "MAX"}, {0, NULL}};
 consvar_t cv_maxsend = CVAR_INIT ("maxsend", "4096", CV_SAVE|CV_NETVAR, maxsend_cons_t, NULL);
@@ -3728,11 +3728,20 @@ static void Got_AddPlayer(UINT8 **p, INT32 playernum);
 
 static void Joinable_OnChange(void)
 {
-#ifdef HAVE_DISCORDRPC
-	DRPC_SendDiscordInfo();
-#else
-	return;
-#endif
+	UINT8 buf[3];
+	UINT8 *p = buf;
+	UINT8 maxplayer;
+
+	if (!server)
+		return;
+
+	maxplayer = (UINT8)(min((dedicated ? MAXPLAYERS-1 : MAXPLAYERS), cv_maxplayers.value));
+
+	WRITEUINT8(p, maxplayer);
+	WRITEUINT8(p, cv_allownewplayer.value);
+	WRITEUINT8(p, cv_discordinvites.value);
+
+	SendNetXCmd(XD_DISCORD, &buf, 3);
 }
 
 // called one time at init
