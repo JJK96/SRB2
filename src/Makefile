@@ -456,6 +456,9 @@ ifdef DATABASE
     CFLAGS += -DDATABASE=${DATABASE}
 endif
 
+LIBS += -lcurl
+LIBS += -ljson-c
+
 OPTS+=$(CPPFLAGS)
 
 # default EXENAME if all else fails

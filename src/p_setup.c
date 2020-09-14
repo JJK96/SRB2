@@ -81,6 +81,8 @@
 
 #include "fastcmp.h" // textmap parsing
 
+#include "speedrun.h"
+
 //
 // Map MD5, calculated on level load.
 // Sent to clients in PT_SERVERINFO.
@@ -3773,6 +3775,7 @@ boolean P_LoadLevel(boolean fromnetsave)
 				G_CopyTiccmd(&players[i].cmd, &netcmds[buf][i], 1);
 		}
 		P_PreTicker(2);
+		send_best_time();
 		LUAh_MapLoad();
 	}
 

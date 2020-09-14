@@ -7,6 +7,8 @@
 #include <mysql.h>
 #include <stdbool.h>
 #include "credentials.h"
+#include <curl/curl.h>
+#include <json-c/json.h>
 
 #define QUERY_LEN 100
 #define TIME_STRING_LEN 10
@@ -16,6 +18,8 @@
 #define INSERT_MAP "insert into maps (id, name) values (?, ?)"
 #define GET_SCORE "select time from highscores where username = ? and skin = ? and map_id = ?"
 #define INSERT_SCORE "insert into highscores (time, time_string, username, skin, map_id, datetime) values (?, ?, ?, ?, ?, NOW())"
+
+#define BEST_SCORE_ON_MAP_URL "https://srb2circuit.eu/highscores/api/bestformaps?map_id=%d&all_skins=on"
 
 // Exits with an error
 void finish_with_error(MYSQL *con)
@@ -234,4 +238,104 @@ void speedrun_map_completed()
     
     // closes the connection
     mysql_close(con);
+}
+
+
+struct string {
+  char *ptr;
+  size_t len;
+};
+
+void init_string(struct string *s) {
+  s->len = 0;
+  s->ptr = malloc(s->len+1);
+  if (s->ptr == NULL) {
+    fprintf(stderr, "malloc() failed\n");
+    exit(EXIT_FAILURE);
+  }
+  s->ptr[0] = '\0';
+}
+
+size_t write_to_string(void *ptr, size_t size, size_t nmemb, struct string *s)
+{
+  size_t new_len = s->len + size*nmemb;
+  s->ptr = realloc(s->ptr, new_len+1);
+  if (s->ptr == NULL) {
+    fprintf(stderr, "realloc() failed\n");
+    exit(EXIT_FAILURE);
+  }
+  memcpy(s->ptr+s->len, ptr, size*nmemb);
+  s->ptr[new_len] = '\0';
+  s->len = new_len;
+
+  return size*nmemb;
+}
+
+void send_best_time()
+{
+    int url_len = strlen(BEST_SCORE_ON_MAP_URL) + 5;
+    char *url[url_len];
+    int mapnum = gamemap-1;
+    snprintf(url, url_len, BEST_SCORE_ON_MAP_URL, mapnum);
+
+
+    CURL *curl;
+    int result;
+
+    curl = curl_easy_init();
+
+    struct string retrieved_data;
+    init_string(&retrieved_data);
+    
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_to_string);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &retrieved_data);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+
+    result = curl_easy_perform(curl);
+
+    curl_easy_cleanup(curl);
+
+
+    struct json_object *base_array, *zero_index, *skin_scores;
+
+    base_array = json_tokener_parse(retrieved_data.ptr);
+
+    char *no_found_map[2];
+    sprintf(no_found_map, "[]");
+
+    // check if the map is found, else don't do anything
+    if (strcmp(retrieved_data.ptr, "[]") != 0)
+    {
+        zero_index = json_object_array_get_idx(base_array, 0);
+        json_object_object_get_ex(zero_index, "skins", &skin_scores);
+        free(retrieved_data.ptr);
+
+        for (int i=0; i<json_object_array_length(skin_scores); i+=1)
+        {
+            struct json_object *score, *time, *username, *skin;
+            score = json_object_array_get_idx(skin_scores, i);
+
+            json_object_object_get_ex(score, "username", &username);
+            json_object_object_get_ex(score, "name", &skin);
+            json_object_object_get_ex(score, "time_string", &time);
+
+            char *s_username = json_object_get_string(username);
+            char *s_skin = json_object_get_string(skin);
+            char *s_time = json_object_get_string(time);
+
+            
+            char buf[254];
+            char *msg = &buf[2];
+            const size_t msgspace = sizeof buf - 2;
+
+            buf[0] = 0; // send message to everyone
+            buf[1] = 1; // send message as server
+
+            // the UXDFS at the start is just a bunch of random letters I'm using as a tag to find the correct message to get data from
+            snprintf(msg, msgspace, "UXDFS%s,%s,%s", s_username, s_skin, s_time);
+
+            SendNetXCmd(XD_SAY, buf, strlen(msg) + 1 + msg-buf);
+        }
+    }
 }
