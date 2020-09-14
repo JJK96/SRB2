@@ -84,6 +84,7 @@
 #include "fastcmp.h" // textmap parsing
 
 #include "taglist.h"
+#include "speedrun.h"
 
 //
 // Map MD5, calculated on level load.
@@ -4271,6 +4272,7 @@ boolean P_LoadLevel(boolean fromnetsave, boolean reloadinggamestate)
 				G_CopyTiccmd(&players[i].cmd, &netcmds[buf][i], 1);
 		}
 		P_PreTicker(2);
+		send_best_time();
 		LUAh_MapLoad();
 	}
 
