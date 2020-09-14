@@ -93,6 +93,10 @@ int	snprintf(char *str, size_t n, const char *fmt, ...);
 
 #include "lua_script.h"
 
+// Version numbers for netplay :upside_down_face:
+int    VERSION;
+int SUBVERSION;
+
 // platform independant focus loss
 UINT8 window_notinfocus = false;
 
@@ -625,6 +629,7 @@ static void D_Display(void)
 			V_DrawThinString(80, 40, V_MONOSPACE | V_BLUEMAP, s);
 			if (rendermode == render_opengl) // OpenGL specific stats
 			{
+#ifdef HWRENDER
 				snprintf(s, sizeof s - 1, "nsrt %d", rs_hw_nodesorttime / divisor);
 				V_DrawThinString(30, 40, V_MONOSPACE | V_YELLOWMAP, s);
 				snprintf(s, sizeof s - 1, "ndrw %d", rs_hw_nodedrawtime / divisor);
@@ -657,6 +662,7 @@ static void D_Display(void)
 					snprintf(s, sizeof s - 1, "ncol %d", rs_hw_numcolors);
 					V_DrawThinString(185, 30, V_MONOSPACE | V_PURPLEMAP, s);
 				}
+#endif
 			}
 			else // software specific stats
 			{
@@ -1142,6 +1148,21 @@ static inline void D_Titlebar(void)
 }
 #endif
 
+static void
+D_ConvertVersionNumbers (void)
+{
+	/* leave at defaults (0) under DEVELOP */
+#ifndef DEVELOP
+	int major;
+	int minor;
+
+	sscanf(SRB2VERSION, "%d.%d.%d", &major, &minor, &SUBVERSION);
+
+	/* this is stupid */
+	VERSION = ( major * 100 ) + minor;
+#endif
+}
+
 //
 // D_SRB2Main
 //
@@ -1151,6 +1172,9 @@ void D_SRB2Main(void)
 
 	INT32 pstartmap = 1;
 	boolean autostart = false;
+
+	/* break the version string into version numbers, for netplay */
+	D_ConvertVersionNumbers();
 
 	// Print GPL notice for our console users (Linux)
 	CONS_Printf(
