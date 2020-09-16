@@ -4,7 +4,6 @@
 #include "g_game.h"
 #include "r_things.h"
 #include <stdio.h>
-#include <mysql.h>
 #include <stdbool.h>
 #include "credentials.h"
 #include <curl/curl.h>
@@ -180,7 +179,8 @@ void insert_map(MYSQL *con, int mapnum, char *mapname)
 }
 
 // Process the time of the player
-void process_time(MYSQL *con, int playernum, int mapnum) {
+void process_time(MYSQL *con, int playernum, int mapnum) 
+{
     // get the player's time, username, character
     int time = players[playernum].realtime;
     char* username = player_names[playernum];
@@ -240,13 +240,8 @@ void speedrun_map_completed()
     mysql_close(con);
 }
 
-
-struct string {
-  char *ptr;
-  size_t len;
-};
-
-void init_string(struct string *s) {
+void init_string(struct string *s)
+{
   s->len = 0;
   s->ptr = malloc(s->len+1);
   if (s->ptr == NULL) {
@@ -274,7 +269,7 @@ size_t write_to_string(void *ptr, size_t size, size_t nmemb, struct string *s)
 void send_best_time()
 {
     int url_len = strlen(BEST_SCORE_ON_MAP_URL) + 5;
-    char *url[url_len];
+    char url[url_len];
     int mapnum = gamemap-1;
     snprintf(url, url_len, BEST_SCORE_ON_MAP_URL, mapnum);
 
@@ -301,7 +296,7 @@ void send_best_time()
 
     base_array = json_tokener_parse(retrieved_data.ptr);
 
-    char *no_found_map[2];
+    char no_found_map[2];
     sprintf(no_found_map, "[]");
 
     // check if the map is found, else don't do anything
@@ -320,9 +315,9 @@ void send_best_time()
             json_object_object_get_ex(score, "name", &skin);
             json_object_object_get_ex(score, "time_string", &time);
 
-            char *s_username = json_object_get_string(username);
-            char *s_skin = json_object_get_string(skin);
-            char *s_time = json_object_get_string(time);
+            const char *s_username = json_object_get_string(username);
+            const char *s_skin = json_object_get_string(skin);
+            const char *s_time = json_object_get_string(time);
 
             
             char buf[254];
