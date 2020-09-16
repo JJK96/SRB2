@@ -60,8 +60,8 @@ local function show_score(v)
 	if no_time
 		v.drawString(4, 173, "NO BEST TIME YET, BE FIRST TO FINISH!", 45056)
 	else
-		v.drawString(4, 173, "BEST SCORE:", 45056)
-		v.drawString(4, 182, string.upper(skin[used_row])+": "+time[used_row]+" by "+username[used_row])
+		v.drawString(4, 173, "BEST TIME FOR " + string.upper(skin[used_row]) + ":", 45056)
+		v.drawString(4, 182, time[used_row]+" by "+username[used_row])
 	end
 	
 end
