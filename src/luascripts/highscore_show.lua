@@ -4,6 +4,9 @@ local time = {}
 local full_rows = 0
 local used_row = 0
 local no_time = true
+local modded_skin = false
+
+local normal_skins = {"sonic", "tails", "knuckles", "fang", "amy", "metalsonic"}
 
 local function receive_data(source, type, target, msg)
 	if msg:sub(0, 5) == "UXDFS"
@@ -46,6 +49,13 @@ end
 local function check_player_skin(player)
 	if player == consoleplayer
 		used_row = find_in_array(skin, player.mo.skin)
+		
+		if find_in_array(normal_skins, player.mo.skin) == -1
+			modded_skin = true
+		else
+			modded_skin = false
+		end
+		
 		if used_row == -1
 			no_time = true
 		else
@@ -57,8 +67,10 @@ addHook("PlayerThink", check_player_skin)
 
 
 local function show_score(v)
-	if no_time
+	if no_time and not modded_skin
 		v.drawString(4, 173, "NO BEST TIME YET, BE FIRST TO FINISH!", 45056)
+	elseif modded_skin
+		v.drawString(4, 173, "CAN'T SEARCH FOR MODDED SKIN SCORES", 45056)
 	else
 		v.drawString(4, 173, "BEST TIME FOR " + string.upper(skin[used_row]) + ":", 45056)
 		v.drawString(4, 182, time[used_row]+" by "+username[used_row])

@@ -18,7 +18,7 @@
 #define GET_SCORE "select time from highscores where username = ? and skin = ? and map_id = ?"
 #define INSERT_SCORE "insert into highscores (time, time_string, username, skin, map_id, datetime) values (?, ?, ?, ?, ?, NOW())"
 
-#define BEST_SCORE_ON_MAP_URL "https://srb2circuit.eu/highscores/api/bestformaps?map_id=%d&all_skins=on"
+#define BEST_SCORE_ON_MAP_URL "https://srb2circuit.eu/highscores/api/bestformaps?map_id=%d"
 
 // Exits with an error
 void finish_with_error(MYSQL *con)
@@ -296,11 +296,8 @@ void send_best_time()
 
     base_array = json_tokener_parse(retrieved_data.ptr);
 
-    char no_found_map[2];
-    sprintf(no_found_map, "[]");
-
     // check if the map is found, else don't do anything
-    if (strcmp(retrieved_data.ptr, "[]") != 0)
+    if ((strcmp(retrieved_data.ptr, "[]") != 0) && (result == CURLE_OK))
     {
         zero_index = json_object_array_get_idx(base_array, 0);
         json_object_object_get_ex(zero_index, "skins", &skin_scores);
