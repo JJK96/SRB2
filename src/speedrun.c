@@ -9,17 +9,6 @@
 #include <curl/curl.h>
 #include <json-c/json.h>
 
-#define QUERY_LEN 100
-#define TIME_STRING_LEN 10
-
-// define the macros for the statements
-#define GET_MAP "select * from maps where id = %d"
-#define INSERT_MAP "insert into maps (id, name) values (?, ?)"
-#define GET_SCORE "select time from highscores where username = ? and skin = ? and map_id = ?"
-#define INSERT_SCORE "insert into highscores (time, time_string, username, skin, map_id, datetime) values (?, ?, ?, ?, ?, NOW())"
-
-#define BEST_SCORE_ON_MAP_URL "https://srb2circuit.eu/highscores/api/bestformaps?map_id=%d"
-
 // Exits with an error
 void finish_with_error(MYSQL *con)
 {
@@ -266,6 +255,28 @@ size_t write_to_string(void *ptr, size_t size, size_t nmemb, struct string *s)
   return size*nmemb;
 }
 
+msg_buf_t msg_buf = {
+    .index = 0
+};
+
+void add_message(char *msg) 
+{
+    if (msg_buf.index >= MSG_BUF_LEN) {
+        fprintf(stderr, "Error: message buffer full\n");
+    }
+    msg_buf.msgs[msg_buf.index++] = msg;
+}
+
+void send_message() 
+{
+    if (msg_buf.index == 0) {
+        fprintf(stderr, "Error: no message to send\n");
+    }
+    char *msg = msg_buf.msgs[--msg_buf.index];
+    SendNetXCmd(XD_SAY, msg, strlen(msg+2) + 3);
+    free(msg);
+}
+
 void send_best_time()
 {
     int url_len = strlen(BEST_SCORE_ON_MAP_URL) + 5;
@@ -317,17 +328,18 @@ void send_best_time()
             const char *s_time = json_object_get_string(time);
 
             
-            char buf[254];
+            char *buf = malloc(MSG_LEN);
             char *msg = &buf[2];
-            const size_t msgspace = sizeof buf - 2;
+            const size_t msgspace = MSG_LEN- 2;
 
             buf[0] = 0; // send message to everyone
             buf[1] = 1; // send message as server
 
             // the UXDFS at the start is just a bunch of random letters I'm using as a tag to find the correct message to get data from
             snprintf(msg, msgspace, "UXDFS%s,%s,%s", s_username, s_skin, s_time);
+            add_message(buf);
+            send_message();
 
-            SendNetXCmd(XD_SAY, buf, strlen(msg) + 1 + msg-buf);
         }
     }
 }
