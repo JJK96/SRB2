@@ -442,7 +442,7 @@ ifdef ZDEBUG
 	CPPFLAGS+=-DZDEBUG
 endif
 
-CFLAGS += -I/usr/include/mysql
+CFLAGS += -I/usr/include/mysql -Wdeclaration-after-statement
 LDFLAGS += -L/usr/local/mysql/lib
 LIBS += -lmysqlclient
 

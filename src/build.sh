@@ -1,4 +1,4 @@
-cmd="make NOUPX=1 NOVERSION=1 CFLAGS=-Wdeclaration-after-statement"
+cmd="make NOUPX=1 NOVERSION=1"
 windows=false
 while [[ $# -gt 0 ]]; do
     case $1 in
