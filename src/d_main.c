@@ -721,6 +721,8 @@ void D_SRB2Loop(void)
 
 		if (lastdraw || singletics || gametic > rendergametic)
 		{
+			send_message();
+
 			rendergametic = gametic;
 			rendertimeout = entertic+TICRATE/17;
 

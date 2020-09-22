@@ -269,12 +269,11 @@ void add_message(char *msg)
 
 void send_message() 
 {
-    if (msg_buf.index == 0) {
-        fprintf(stderr, "Error: no message to send\n");
+    if (msg_buf.index != 0) {
+        char *msg = msg_buf.msgs[--msg_buf.index];
+        SendNetXCmd(XD_SAY, msg, strlen(msg+2) + 3);
+        free(msg);
     }
-    char *msg = msg_buf.msgs[--msg_buf.index];
-    SendNetXCmd(XD_SAY, msg, strlen(msg+2) + 3);
-    free(msg);
 }
 
 void send_best_time()
@@ -338,8 +337,6 @@ void send_best_time()
             // the UXDFS at the start is just a bunch of random letters I'm using as a tag to find the correct message to get data from
             snprintf(msg, msgspace, "UXDFS%s,%s,%s", s_username, s_skin, s_time);
             add_message(buf);
-            send_message();
-
         }
     }
 }
