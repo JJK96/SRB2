@@ -263,6 +263,7 @@ void add_message(char *msg)
 {
     if (msg_buf.index >= MSG_BUF_LEN) {
         fprintf(stderr, "Error: message buffer full\n");
+        return;
     }
     msg_buf.msgs[msg_buf.index++] = msg;
 }

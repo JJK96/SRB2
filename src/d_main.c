@@ -72,6 +72,7 @@ int	snprintf(char *str, size_t n, const char *fmt, ...);
 #include "keys.h"
 #include "filesrch.h" // refreshdirmenu, mainwadstally
 #include "g_input.h" // tutorial mode control scheming
+#include "speedrun.h"
 
 #ifdef CMAKECONFIG
 #include "config.h"
