@@ -44,7 +44,7 @@ end
 
 
 local function check_player_skin(player)
-	if player == consoleplayer
+	if player == displayplayer
 		used_row = find_in_array(skin, player.mo.skin)
 		
 		if used_row == -1
@@ -58,7 +58,7 @@ addHook("PlayerThink", check_player_skin)
 
 
 local function show_score(v)
-	if no_time and not modded_skin
+	if no_time
 		v.drawString(4, 173, "NO BEST TIME YET, BE FIRST TO FINISH!", 45056)
 	else
 		v.drawString(4, 173, "BEST TIME FOR " + string.upper(skin[used_row]) + ":", 45056)
