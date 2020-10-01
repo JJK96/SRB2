@@ -142,6 +142,7 @@ void P_SetPlayerAngle(player_t *player, angle_t angle);
 angle_t P_GetLocalAngle(player_t *player);
 void P_SetLocalAngle(player_t *player, angle_t angle);
 void P_ForceLocalAngle(player_t *player, angle_t angle);
+boolean P_PlayerFullbright(player_t *player);
 
 boolean P_IsObjectInGoop(mobj_t *mo);
 boolean P_IsObjectOnGround(mobj_t *mo);
@@ -177,6 +178,7 @@ void P_BlackOw(player_t *player);
 void P_ElementalFire(player_t *player, boolean cropcircle);
 void P_SpawnSkidDust(player_t *player, fixed_t radius, boolean sound);
 
+void P_MovePlayer(player_t *player);
 void P_DoPityCheck(player_t *player);
 void P_PlayerThink(player_t *player);
 void P_PlayerAfterThink(player_t *player);
@@ -271,6 +273,8 @@ extern mapthing_t *itemrespawnque[ITEMQUESIZE];
 extern tic_t itemrespawntime[ITEMQUESIZE];
 extern size_t iquehead, iquetail;
 extern consvar_t cv_gravity, cv_movebob;
+
+mobjtype_t P_GetMobjtype(UINT16 mthingtype);
 
 void P_RespawnSpecials(void);
 

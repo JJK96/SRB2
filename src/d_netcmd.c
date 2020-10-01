@@ -701,6 +701,7 @@ void D_RegisterClientCommands(void)
 #endif
 	CV_RegisterVar(&cv_rollingdemos);
 	CV_RegisterVar(&cv_netstat);
+	CV_RegisterVar(&cv_netticbuffer);
 
 #ifdef NETGAME_DEVMODE
 	CV_RegisterVar(&cv_fishcake);
@@ -859,10 +860,6 @@ void D_RegisterClientCommands(void)
 	CV_RegisterVar(&cv_digmusicvolume);
 	CV_RegisterVar(&cv_midimusicvolume);
 	CV_RegisterVar(&cv_numChannels);
-
-	// i_cdmus.c
-	CV_RegisterVar(&cd_volume);
-	CV_RegisterVar(&cdUpdate);
 
 	// screen.c
 	CV_RegisterVar(&cv_fullscreen);
@@ -1129,6 +1126,8 @@ static void SetPlayerName(INT32 playernum, char *newname)
 			if (netgame)
 				HU_AddChatText(va("\x82*%s renamed to %s", player_names[playernum], newname), false);
 
+			player_name_changes[playernum]++;
+
 			strcpy(player_names[playernum], newname);
 		}
 	}
@@ -1305,7 +1304,12 @@ static void SendNameAndColor(void)
 	snacpending++;
 
 	// Don't change name if muted
-	if (cv_mute.value && !(server || IsPlayerAdmin(consoleplayer)))
+	if (player_name_changes[consoleplayer] >= MAXNAMECHANGES)
+	{
+		CV_StealthSet(&cv_playername, player_names[consoleplayer]);
+		HU_AddChatText("\x85*You must wait to change your name again", false);
+	}
+	else if (cv_mute.value && !(server || IsPlayerAdmin(consoleplayer)))
 		CV_StealthSet(&cv_playername, player_names[consoleplayer]);
 	else // Cleanup name if changing it
 		CleanupPlayerName(consoleplayer, cv_playername.zstring);
@@ -1466,8 +1470,11 @@ static void Got_NameAndColor(UINT8 **cp, INT32 playernum)
 	skin = READUINT8(*cp);
 
 	// set name
-	if (strcasecmp(player_names[playernum], name) != 0)
-		SetPlayerName(playernum, name);
+	if (player_name_changes[playernum] < MAXNAMECHANGES)
+	{
+		if (strcasecmp(player_names[playernum], name) != 0)
+			SetPlayerName(playernum, name);
+	}
 
 	// set color
 	p->skincolor = color % numskincolors;

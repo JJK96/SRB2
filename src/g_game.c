@@ -453,6 +453,8 @@ player_t *seenplayer; // player we're aiming at right now
 // so that it doesn't have to be updated depending on the value of MAXPLAYERS
 char player_names[MAXPLAYERS][MAXPLAYERNAME+1];
 
+INT32 player_name_changes[MAXPLAYERS];
+
 INT16 rw_maximums[NUM_WEAPONS] =
 {
 	800, // MAX_INFINITY
@@ -1341,8 +1343,8 @@ void G_BuildTiccmd(ticcmd_t *cmd, INT32 realtics, UINT8 ssplayer)
 
 	// use with any button/key
 	axis = PlayerJoyAxis(ssplayer, AXISSPIN);
-	if (PLAYERINPUTDOWN(ssplayer, gc_use) || (usejoystick && axis > 0))
-		cmd->buttons |= BT_USE;
+	if (PLAYERINPUTDOWN(ssplayer, gc_spin) || (usejoystick && axis > 0))
+		cmd->buttons |= BT_SPIN;
 
 	// Centerview can be a toggle in simple mode!
 	{
@@ -2014,7 +2016,9 @@ boolean G_Responder(event_t *ev)
 		if (F_CreditResponder(ev))
 		{
 			// Skip credits for everyone
-			if (!netgame || server || IsPlayerAdmin(consoleplayer))
+			if (! serverrunning)/* hahahahahaha */
+				F_StartGameEvaluation();
+			else if (server || IsPlayerAdmin(consoleplayer))
 				SendNetXCmd(XD_EXITLEVEL, NULL, 0);
 			return true;
 		}
@@ -2247,7 +2251,10 @@ void G_Ticker(boolean run)
 
 			players[i].angleturn += players[i].cmd.angleturn - players[i].oldrelangleturn;
 			players[i].oldrelangleturn = players[i].cmd.angleturn;
-			players[i].cmd.angleturn = players[i].angleturn;
+			if (P_ControlStyle(&players[i]) == CS_LMAOGALOG)
+				P_ForceLocalAngle(&players[i], players[i].angleturn << 16);
+			else
+				players[i].cmd.angleturn = players[i].angleturn;
 		}
 	}
 
@@ -2341,6 +2348,11 @@ void G_Ticker(boolean run)
 
 		if (camtoggledelay2)
 			camtoggledelay2--;
+
+		if (gametic % NAMECHANGERATE == 0)
+		{
+			memset(player_name_changes, 0, sizeof player_name_changes);
+		}
 	}
 }
 
@@ -2571,7 +2583,7 @@ void G_PlayerReborn(INT32 player, boolean betweenmaps)
 	p->spheres = spheres;
 
 	// Don't do anything immediately
-	p->pflags |= PF_USEDOWN;
+	p->pflags |= PF_SPINDOWN;
 	p->pflags |= PF_ATTACKDOWN;
 	p->pflags |= PF_JUMPDOWN;
 
@@ -3805,7 +3817,7 @@ static void G_DoCompleted(void)
 	// a map of the proper gametype -- skip levels that don't support
 	// the current gametype. (Helps avoid playing boss levels in Race,
 	// for instance).
-	if (!spec)
+	if (!spec || nextmapoverride)
 	{
 		if (nextmap >= 0 && nextmap < NUMMAPS)
 		{
@@ -3857,7 +3869,8 @@ static void G_DoCompleted(void)
 		if (nextmap < 0 || (nextmap >= NUMMAPS && nextmap < 1100-1) || nextmap > 1103-1)
 			I_Error("Followed map %d to invalid map %d\n", prevmap + 1, nextmap + 1);
 
-		lastmap = nextmap; // Remember last map for when you come out of the special stage.
+		if (!spec)
+			lastmap = nextmap; // Remember last map for when you come out of the special stage.
 	}
 
 	if ((gottoken = ((gametyperules & GTR_SPECIALSTAGES) && token)))
@@ -3878,7 +3891,7 @@ static void G_DoCompleted(void)
 		}
 	}
 
-	if (spec && !gottoken)
+	if (spec && !gottoken && !nextmapoverride)
 		nextmap = lastmap; // Exiting from a special stage? Go back to the game. Tails 08-11-2001
 
 	automapactive = false;
@@ -4507,7 +4520,7 @@ void G_SaveGame(UINT32 slot, INT16 mapnum)
 		{
 			UINT32 writetime = marathontime;
 			if (!(marathonmode & MA_INGAME))
-				marathontime += TICRATE*5; // live event backup penalty because we don't know how long it takes to get to the next map
+				writetime += TICRATE*5; // live event backup penalty because we don't know how long it takes to get to the next map
 			WRITEUINT32(save_p, writetime);
 			WRITEUINT8(save_p, (marathonmode & ~MA_INIT));
 		}
