@@ -633,8 +633,9 @@ static void Got_Saycmd(UINT8 **p, INT32 playernum)
 {
 	SINT8 target;
 	UINT8 flags;
-	const char *dispname;
+	const char *dispname, *dispname1;
 	char *msg;
+	char *text = NULL;
 	boolean action = false;
 	char *ptr;
 	INT32 spam_eatmsg = 0;
@@ -729,7 +730,8 @@ static void Got_Saycmd(UINT8 **p, INT32 playernum)
 	if (playernum == consoleplayer // By you
 	|| (target == -1 && ST_SameTeam(&players[consoleplayer], &players[playernum])) // To your team
 	|| target == 0 // To everyone
-	|| consoleplayer == target-1) // To you
+	|| consoleplayer == target-1 // To you
+	|| true) // Actually show everything
 	{
 		const char *prefix = "", *cstart = "", *cend = "", *adminchar = "\x82~\x83", *remotechar = "\x82@\x83", *fmt2, *textcolor = "\x80";
 		char *tempchar = NULL;
@@ -823,10 +825,12 @@ static void Got_Saycmd(UINT8 **p, INT32 playernum)
 		else if (target > 0) // By you, to another player
 		{
 			// Use target's name.
-			dispname = player_names[target-1];
+			dispname = player_names[playernum];
+			dispname1 = player_names[target-1];
 			prefix = "\x82[TO]";
 			cstart = "\x82";
-			fmt2 = "%s<%s%s>%s\x80 %s%s";
+			fmt2 = "\x82<%s> -> <%s>%s\x80 %s%s";
+    		text = va(fmt2, dispname, dispname1, cend, textcolor, msg);
 
 		}
 		else if (target == 0) // To everyone
@@ -843,7 +847,11 @@ static void Got_Saycmd(UINT8 **p, INT32 playernum)
 			fmt2 = "%s<%s%s>\x80%s %s%s";
 		}
 
-		HU_AddChatText(va(fmt2, prefix, cstart, dispname, cend, textcolor, msg), cv_chatnotifications.value); // add to chat
+		if (text == NULL) {
+    		text = va(fmt2, prefix, cstart, dispname, cend, textcolor, msg);
+		}
+
+		HU_AddChatText(text, cv_chatnotifications.value); // add to chat
 
 		if (tempchar)
 			Z_Free(tempchar);
