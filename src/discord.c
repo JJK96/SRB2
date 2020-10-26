@@ -570,30 +570,28 @@ void DRPC_UpdatePresence(void)
 		// Offline info
 		if (Playing())
 			discordPresence.state = "Offline";
-		else if (demo.playback && !demo.title)
+		else if (demoplayback && !titledemo)
 			discordPresence.state = "Watching Replay";
 		else
 			discordPresence.state = "Menu";
 	}
 
 	// Gametype info
-	if ((gamestate == GS_LEVEL || gamestate == GS_INTERMISSION || gamestate == GS_VOTING) && Playing())
+	if ((gamestate == GS_LEVEL || gamestate == GS_INTERMISSION) && Playing())
 	{
 		if (modeattacking)
 			discordPresence.details = "Time Attack";
 		else
 		{
-			snprintf(detailstr, 48, "%s%s%s",
-				gametype_cons_t[gametype].strvalue,
-				(gametype == GT_RACE) ? va(" | %s", kartspeed_cons_t[gamespeed].strvalue) : "",
-				(encoremode == true) ? " | Encore" : ""
+			snprintf(detailstr, 48, "%s",
+				gametype_cons_t[gametype].strvalue
 			);
 			discordPresence.details = detailstr;
 		}
 	}
 
 	if ((gamestate == GS_LEVEL || gamestate == GS_INTERMISSION) // Map info
-		&& !(demo.playback && demo.title))
+		&& !(demoplayback && titledemo))
 	{
 		if ((gamemap >= 1 && gamemap <= 60) // supported race maps
 			|| (gamemap >= 136 && gamemap <= 164)) // supported battle maps
@@ -628,21 +626,16 @@ void DRPC_UpdatePresence(void)
 		if (gamestate == GS_LEVEL && Playing())
 		{
 			const time_t currentTime = time(NULL);
-			const time_t mapTimeStart = currentTime - ((leveltime + (modeattacking ? starttime : 0)) / TICRATE);
+			const time_t mapTimeStart = currentTime - (leveltime / TICRATE);
 
 			discordPresence.startTimestamp = mapTimeStart;
 
 			if (timelimitintics > 0)
 			{
-				const time_t mapTimeEnd = mapTimeStart + ((timelimitintics + starttime + 1) / TICRATE);
+				const time_t mapTimeEnd = mapTimeStart + ((timelimitintics + 1) / TICRATE);
 				discordPresence.endTimestamp = mapTimeEnd;
 			}
 		}
-	}
-	else if (gamestate == GS_VOTING)
-	{
-		discordPresence.largeImageKey = (G_BattleGametype() ? "miscredplanet" : "miscblueplanet");
-		discordPresence.largeImageText = "Voting";
 	}
 	else
 	{
@@ -660,39 +653,7 @@ void DRPC_UpdatePresence(void)
 			"tails",
 			"knuckles",
 			"eggman",
-			"metalsonic",
-			// bonus chars
-			"flicky",
-			"motobug",
-			"amy",
-			"mighty",
-			"ray",
-			"espio",
-			"vector",
-			"chao",
-			"gamma",
-			"chaos",
-			"shadow",
-			"rouge",
-			"herochao",
-			"darkchao",
-			"cream",
-			"omega",
-			"blaze",
-			"silver",
-			"wonderboy",
-			"arle",
-			"nights",
-			"sakura",
-			"ulala",
-			"beat",
-			"vyse",
-			"aiai",
-			"kiryu",
-			"aigis",
-			"miku",
-			"doom",
-			NULL
+			"metalsonic"
 		};
 
 		boolean customChar = true;
