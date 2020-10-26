@@ -977,21 +977,6 @@ static void ChangeDirForUrlHandler(void)
 // Identify the SRB2 version, and IWAD file to use.
 // ==========================================================================
 
-static boolean AddIWAD(void)
-{
-	char * path = va(pandf,srb2path,"srb2.srb");
-
-	if (FIL_ReadFileOK(path))
-	{
-		D_AddFile(path, startupwadfiles);
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
 static void IdentifyVersion(void)
 {
 	char *srb2wad;

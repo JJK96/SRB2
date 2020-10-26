@@ -53,10 +53,6 @@
 #include "f_finale.h"
 #endif
 
-#ifdef _XBOX
-#include "sdl12/SRB2XBOX/xboxhelp.h"
-#endif
-
 #ifdef HAVE_DISCORDRPC
 #include "discord.h"
 #endif

@@ -393,10 +393,6 @@ CFLAGS+=-DHAVE_DISCORDRPC
 OBJS+=$(OBJDIR)/discord.o
 endif
 
-ifndef NO_LUA
-	include blua/Makefile.cfg
-endif
-
 ifdef NOMD5
 	OPTS+=-DNOMD5
 else
