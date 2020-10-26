@@ -1774,6 +1774,7 @@ menu_t MISC_HelpDef = IMAGEDEF(MISC_HelpMenu);
 
 #ifdef HAVE_DISCORDRPC
 menu_t MISC_DiscordRequestsDef = {
+    MN_DISCORD_RQ,
 	NULL,
 	sizeof (MISC_DiscordRequestsMenu)/sizeof (menuitem_t),
 	&MPauseDef,
@@ -2322,7 +2323,7 @@ menu_t OP_EraseDataDef = DEFAULTMENUSTYLE(
 	"M_DATA", OP_EraseDataMenu, &OP_DataOptionsDef, 60, 30);
 
 #ifdef HAVE_DISCORDRPC
-menu_t OP_DiscordOptionsDef = DEFAULTMENUSTYLE(NULL, OP_DiscordOptionsMenu, &OP_DataOptionsDef, 30, 30);
+menu_t OP_DiscordOptionsDef = DEFAULTMENUSTYLE(MN_DISCORD_OPT, NULL, OP_DiscordOptionsMenu, &OP_DataOptionsDef, 30, 30);
 #endif
 
 // ==========================================================================
@@ -13632,12 +13633,12 @@ static void M_DrawDiscordRequests(void)
 	{
 		if (confirmAccept == true)
 		{
-			colormap = R_GetTranslationColormap(TC_DEFAULT, SKINCOLOR_GREEN, GTC_MENUCACHE);
+			colormap = R_GetTranslationColormap(TC_DEFAULT, SKINCOLOR_GREEN, GTC_CACHE);
 			hand = W_CachePatchName("K_LAPH02", PU_CACHE);
 		}
 		else
 		{
-			colormap = R_GetTranslationColormap(TC_DEFAULT, SKINCOLOR_RED, GTC_MENUCACHE);
+			colormap = R_GetTranslationColormap(TC_DEFAULT, SKINCOLOR_RED, GTC_CACHE);
 			hand = W_CachePatchName("K_LAPH03", PU_CACHE);
 		}
 
@@ -13650,7 +13651,7 @@ static void M_DrawDiscordRequests(void)
 	}
 	else
 	{
-		colormap = R_GetTranslationColormap(TC_DEFAULT, SKINCOLOR_GREY, GTC_MENUCACHE);
+		colormap = R_GetTranslationColormap(TC_DEFAULT, SKINCOLOR_GREY, GTC_CACHE);
 	}
 
 	V_DrawFixedPatch(56*FRACUNIT, 150*FRACUNIT, FRACUNIT, 0, W_CachePatchName("K_LAPE01", PU_CACHE), colormap);
