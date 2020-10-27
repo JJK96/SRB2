@@ -1866,7 +1866,7 @@ void D_SetupVote(void)
 	SendNetXCmd(XD_SETUPVOTE, buf, p - buf);
 }
 
-void D_ModifyClientVote(INT8 voted)
+void D_ModifyClientVote(SINT8 voted)
 {
 	XBOXSTATIC UINT8 buf[1];
 	buf[0] = (UINT8)(voted+1);
@@ -4353,14 +4353,14 @@ static void Got_SetupVotecmd(UINT8 **cp, INT32 playernum)
 
 static void Got_ModifyVotecmd(UINT8 **cp, INT32 playernum)
 {
-	INT8 voted = READUINT8(*cp);
-	votes[playernum] = (INT8)(voted-1);
+	SINT8 voted = READUINT8(*cp);
+	votes[playernum] = (SINT8)(voted-1);
 }
 
 static void Got_PickVotecmd(UINT8 **cp, INT32 playernum)
 {
-	INT8 pick = READUINT8(*cp);
-	INT8 level = READUINT8(*cp);
+	SINT8 pick = READUINT8(*cp);
+	SINT8 level = READUINT8(*cp);
 
 	if (playernum != serverplayer && !IsPlayerAdmin(playernum))
 	{
@@ -4376,7 +4376,7 @@ static void Got_PickVotecmd(UINT8 **cp, INT32 playernum)
 		return;
 	}
 
-	Y_SetupVoteFinish((INT8)pick, (INT8)level);
+	Y_SetupVoteFinish((SINT8)pick, (SINT8)level);
 }
 
 /** Prints the number of the displayplayer.

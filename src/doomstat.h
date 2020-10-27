@@ -614,8 +614,8 @@ extern INT16 scramblecount; //for CTF team scramble
 extern INT32 cheats;
 
 extern INT16 votelevels[4];
-extern INT8 votes[MAXPLAYERS];
-extern INT8 pickedvote;
+extern SINT8 votes[MAXPLAYERS];
+extern SINT8 pickedvote;
 
 extern tic_t hidetime;
 

@@ -251,8 +251,8 @@ static INT16 randmapbuffer[NUMMAPS]; // Buffer for maps RandMap is allowed to ro
 
 // Voting system
 INT16 votelevels[4]; // Levels that were rolled by the host
-INT8 votes[MAXPLAYERS]; // Each player's vote
-INT8 pickedvote; // What vote the host rolls
+SINT8 votes[MAXPLAYERS]; // Each player's vote
+SINT8 pickedvote; // What vote the host rolls
 
 tic_t hidetime;
 

@@ -184,7 +184,7 @@ typedef struct
 
 typedef struct
 {
-	INT8 selection;
+	SINT8 selection;
 	UINT8 delay;
 	UINT8 ranim;
 	UINT8 rtics;
@@ -2614,7 +2614,7 @@ static void Y_UnloadVoteData(void)
 //
 // Y_SetupVoteFinish
 //
-void Y_SetupVoteFinish(INT8 pick, INT8 level)
+void Y_SetupVoteFinish(SINT8 pick, SINT8 level)
 {
 	pickedvote = pick;
 	nextmap = votelevels[level];
