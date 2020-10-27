@@ -174,8 +174,6 @@ static void Y_CalculateMatchWinners(void);
 static void Y_UnloadData(void);
 static void Y_CleanupData(void);
 
-// SRB2Kart: voting stuff
-
 typedef struct
 {
 	char str[40];
@@ -2242,8 +2240,6 @@ static void Y_CleanupData(void)
 	}
 }
 
-// SRB2Kart: Voting!
-
 //
 // Y_VoteDrawer
 //
@@ -2261,14 +2257,9 @@ void Y_VoteDrawer(void)
 
 	V_DrawFill(0, 0, BASEVIDWIDTH, BASEVIDHEIGHT, 31);
 
-	if (widebgpatch && rendermode == render_soft && vid.width / vid.dupx > 320)
-		V_DrawScaledPatch(((vid.width/2) / vid.dupx) - (SHORT(widebgpatch->width)/2),
-							(vid.height / vid.dupy) - SHORT(widebgpatch->height),
-							V_SNAPTOTOP|V_SNAPTOLEFT, widebgpatch);
-	else
-		V_DrawScaledPatch(((vid.width/2) / vid.dupx) - (SHORT(bgpatch->width)/2), // Keep the width/height adjustments, for screens that are less wide than 320(?)
-							(vid.height / vid.dupy) - SHORT(bgpatch->height),
-							V_SNAPTOTOP|V_SNAPTOLEFT, bgpatch);
+	V_DrawScaledPatch(((vid.width/2) / vid.dupx) - (SHORT(bgpatch->width)/2), // Keep the width/height adjustments, for screens that are less wide than 320(?)
+						(vid.height / vid.dupy) - SHORT(bgpatch->height),
+						V_SNAPTOTOP|V_SNAPTOLEFT, bgpatch);
 
 	y = 30;
 	for (i = 0; i < 4; i++)
@@ -2450,12 +2441,12 @@ void Y_VoteTicker(void)
 			D_ModifyClientVote(-1);
 		else if (pickedvote == -1 && votes[consoleplayer] == -1 && !voteclient.delay)
 		{
-			if (PLAYER1INPUTDOWN(gc_aimforward) || PlayerJoyAxis(AXISMOVE, 1) < 0)
+			if (PLAYER1INPUTDOWN(gc_forward) || PlayerJoyAxis(AXISMOVE, 1) < 0)
 			{
 				voteclient.selection--;
 				pressed = true;
 			}
-			if ((PLAYER1INPUTDOWN(gc_aimbackward) || PlayerJoyAxis(AXISMOVE, 1) > 0) && !pressed)
+			if ((PLAYER1INPUTDOWN(gc_backward) || PlayerJoyAxis(AXISMOVE, 1) > 0) && !pressed)
 			{
 				voteclient.selection++;
 				pressed = true;
@@ -2464,7 +2455,7 @@ void Y_VoteTicker(void)
 				voteclient.selection = 3;
 			if (voteclient.selection > 3)
 				voteclient.selection = 0;
-			if (PLAYER1INPUTDOWN(gc_accelerate) && !pressed)
+			if (PLAYER1INPUTDOWN(gc_jump) && !pressed)
 			{
 				D_ModifyClientVote(voteclient.selection);
 				pressed = true;
@@ -2524,7 +2515,6 @@ void Y_StartVote(void)
 		I_Error("voteendtic is dirty");
 #endif
 
-	widebgpatch = W_CachePatchName("INTERSCW", PU_STATIC);
 	bgpatch = W_CachePatchName("INTERSCR", PU_STATIC);
 	cursor = W_CachePatchName("M_CURSOR", PU_STATIC);
 	randomlvl = W_CachePatchName("RANDOMLV", PU_STATIC);
@@ -2584,7 +2574,6 @@ static void Y_UnloadVoteData(void)
 	if (rendermode != render_soft)
 		return;
 
-	UNLOAD(widebgpatch);
 	UNLOAD(bgpatch);
 	UNLOAD(cursor);
 	UNLOAD(randomlvl);
