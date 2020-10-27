@@ -835,7 +835,7 @@ INT16 G_SoftwareClipAimingPitch(INT32 *aiming)
 	return (INT16)((*aiming)>>16);
 }
 
-INT32 JoyAxis(axis_input_e axissel)
+INT32 PlayerJoyAxis(axis_input_e axissel, UINT8 p)
 {
 	INT32 retaxis;
 	INT32 axisval;
@@ -983,8 +983,6 @@ static INT32 Joy2Axis(axis_input_e axissel)
 	return retaxis;
 }
 
-
-#define PlayerJoyAxis(p, ax) ((p) == 1 ? JoyAxis(ax) : Joy2Axis(ax))
 
 // Take a magnitude of two axes, and adjust it to take out the deadzone
 // Will return a value between 0 and JOYAXISRANGE

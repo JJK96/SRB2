@@ -128,8 +128,6 @@ INT16 G_SoftwareClipAimingPitch(INT32 *aiming);
 extern angle_t localangle, localangle2;
 extern INT32 localaiming, localaiming2; // should be an angle_t but signed
 
-INT32 JoyAxis(axis_input_e axissel, UINT8 p);
-
 //
 // GAME
 //
