@@ -1868,14 +1868,14 @@ void D_SetupVote(void)
 
 void D_ModifyClientVote(SINT8 voted)
 {
-	XBOXSTATIC UINT8 buf[1];
+	static UINT8 buf[1];
 	buf[0] = (UINT8)(voted+1);
 	SendNetXCmd(XD_MODIFYVOTE, &buf, 1);
 }
 
 void D_PickVote(void)
 {
-	XBOXSTATIC UINT8 buf[2];
+	static UINT8 buf[2];
 	UINT8 temppicks[MAXPLAYERS];
 	UINT8 templevels[MAXPLAYERS];
 	UINT8 numvotes = 0, key = 0;
@@ -4331,7 +4331,7 @@ static void Got_SetupVotecmd(UINT8 **cp, INT32 playernum)
 		CONS_Alert(CONS_WARNING, M_GetText("Illegal vote setup received from %s\n"), player_names[playernum]);
 		if (server)
 		{
-			XBOXSTATIC UINT8 buf[2];
+			static UINT8 buf[2];
 
 			buf[0] = (UINT8)playernum;
 			buf[1] = KICK_MSG_CON_FAIL;
@@ -4367,7 +4367,7 @@ static void Got_PickVotecmd(UINT8 **cp, INT32 playernum)
 		CONS_Alert(CONS_WARNING, M_GetText("Illegal vote setup received from %s\n"), player_names[playernum]);
 		if (server)
 		{
-			XBOXSTATIC UINT8 buf[2];
+			static UINT8 buf[2];
 
 			buf[0] = (UINT8)playernum;
 			buf[1] = KICK_MSG_CON_FAIL;
