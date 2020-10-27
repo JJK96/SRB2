@@ -2546,32 +2546,16 @@ void Y_StartVote(void)
 		lumpnum_t lumpnum;
 
 		// set up the str
-		if (mapheaderinfo[votelevels[i]]->zonttl)
-		{
-			if (mapheaderinfo[votelevels[i]]->actnum)
-				snprintf(levelinfo[i].str,
-					sizeof levelinfo[i].str,
-					"%.32s %.32s %d",
-					mapheaderinfo[votelevels[i]]->lvlttl, mapheaderinfo[votelevels[i]]->zonttl, mapheaderinfo[votelevels[i]]->actnum);
-			else
-				snprintf(levelinfo[i].str,
-					sizeof levelinfo[i].str,
-					"%.32s %.32s",
-					mapheaderinfo[votelevels[i]]->lvlttl, mapheaderinfo[votelevels[i]]->zonttl);
-		}
+		if (mapheaderinfo[votelevels[i]]->actnum)
+			snprintf(levelinfo[i].str,
+				sizeof levelinfo[i].str,
+				"%.32s %d",
+				mapheaderinfo[votelevels[i]]->lvlttl, mapheaderinfo[votelevels[i]]->actnum);
 		else
-		{
-			if (mapheaderinfo[votelevels[i]]->actnum)
-				snprintf(levelinfo[i].str,
-					sizeof levelinfo[i].str,
-					"%.32s %d",
-					mapheaderinfo[votelevels[i]]->lvlttl, mapheaderinfo[votelevels[i]]->actnum);
-			else
-				snprintf(levelinfo[i].str,
-					sizeof levelinfo[i].str,
-					"%.32s",
-					mapheaderinfo[votelevels[i]]->lvlttl);
-		}
+			snprintf(levelinfo[i].str,
+				sizeof levelinfo[i].str,
+				"%.32s",
+				mapheaderinfo[votelevels[i]]->lvlttl);
 
 		levelinfo[i].str[sizeof levelinfo[i].str - 1] = '\0';
 
