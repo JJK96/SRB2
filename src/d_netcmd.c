@@ -54,6 +54,10 @@
 #define CV_RESTRICT 0
 #endif
 
+#ifdef HAVE_DISCORDRPC
+#include "discord.h"
+#endif
+
 // ------
 // protos
 // ------
@@ -70,6 +74,7 @@ static void Got_RandomSeed(UINT8 **cp, INT32 playernum);
 static void Got_RunSOCcmd(UINT8 **cp, INT32 playernum);
 static void Got_Teamchange(UINT8 **cp, INT32 playernum);
 static void Got_Clearscores(UINT8 **cp, INT32 playernum);
+static void Got_DiscordInfo(UINT8 **cp, INT32 playernum);
 
 static void PointLimit_OnChange(void);
 static void TimeLimit_OnChange(void);
@@ -597,10 +602,12 @@ void D_RegisterServerCommands(void)
 	CV_RegisterVar(&cv_showping);
 
 #ifdef SEENAMES
-	 CV_RegisterVar(&cv_allowseenames);
+	CV_RegisterVar(&cv_allowseenames);
 #endif
 
 	CV_RegisterVar(&cv_dummyconsvar);
+
+	RegisterNetXCmd(XD_DISCORD, Got_DiscordInfo);
 }
 
 // =========================================================================
@@ -907,6 +914,13 @@ void D_RegisterClientCommands(void)
 #endif
 #ifdef LUA_ALLOW_BYTECODE
 	COM_AddCommand("dumplua", Command_Dumplua_f);
+#endif
+
+#ifdef HAVE_DISCORDRPC
+	CV_RegisterVar(&cv_discordrp);
+	CV_RegisterVar(&cv_discordstreamer);
+	CV_RegisterVar(&cv_discordasks);
+	CV_RegisterVar(&cv_discordinvites);
 #endif
 }
 
@@ -1527,6 +1541,11 @@ static void Got_NameAndColor(UINT8 **cp, INT32 playernum)
 	}
 	else
 		SetPlayerSkinByNum(playernum, skin);
+
+#ifdef HAVE_DISCORDRPC
+	if (playernum == consoleplayer)
+		DRPC_UpdatePresence();
+#endif
 }
 
 void SendWeaponPref(void)
@@ -2117,6 +2136,10 @@ static void Got_Mapcmd(UINT8 **cp, INT32 playernum)
 	if (demorecording) // Okay, level loaded, character spawned and skinned,
 		G_BeginRecording(); // I AM NOW READY TO RECORD.
 	demo_start = true;
+
+#ifdef HAVE_DISCORDRPC
+	DRPC_UpdatePresence();
+#endif
 }
 
 static void Command_Pause(void)
@@ -3835,6 +3858,10 @@ static void TimeLimit_OnChange(void)
 	}
 	else if (netgame || multiplayer)
 		CONS_Printf(M_GetText("Time limit disabled\n"));
+
+#ifdef HAVE_DISCORDRPC
+	DRPC_UpdatePresence();
+#endif
 }
 
 /** Adjusts certain settings to match a changed gametype.
@@ -4664,4 +4691,33 @@ static void BaseNumLaps_OnChange(void)
 		else
 			CONS_Printf(M_GetText("Number of laps will be changed to %d next round.\n"), cv_basenumlaps.value);
 	}
+}
+
+void Got_DiscordInfo(UINT8 **p, INT32 playernum)
+{
+	if (playernum != serverplayer /*&& !IsPlayerAdmin(playernum)*/)
+	{
+		// protect against hacked/buggy client
+		CONS_Alert(CONS_WARNING, M_GetText("Illegal Discord info command received from %s\n"), player_names[playernum]);
+		if (server)
+		{
+			XBOXSTATIC UINT8 buf[2];
+
+			buf[0] = (UINT8)playernum;
+			buf[1] = KICK_MSG_CON_FAIL;
+			SendNetXCmd(XD_KICK, &buf, 2);
+		}
+		return;
+	}
+
+	// Don't do anything with the information if we don't have Discord RP support
+#ifdef HAVE_DISCORDRPC
+	discordInfo.maxPlayers = READUINT8(*p);
+	discordInfo.joinsAllowed = (boolean)READUINT8(*p);
+	discordInfo.everyoneCanInvite = (boolean)READUINT8(*p);
+
+	DRPC_UpdatePresence();
+#else
+	(*p) += 3;
+#endif
 }
