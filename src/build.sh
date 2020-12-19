@@ -1,3 +1,4 @@
+#!/bin/bash
 cmd="make NOUPX=1 NOVERSION=1"
 windows=false
 while [[ $# -gt 0 ]]; do
