@@ -15,7 +15,7 @@
 #define GET_SCORE "select time from highscores where username = ? and skin = ? and map_id = ?"
 #define INSERT_SCORE "insert into highscores (time, time_string, username, skin, map_id, datetime) values (?, ?, ?, ?, ?, NOW())"
 
-#define BEST_SCORE_ON_MAP_URL "https://srb2circuit.eu/highscores/api/bestformaps?map_id=%d&all_skins=on"
+#define BEST_SCORE_ON_MAP_URL "http://localhost/highscores/api/bestformaps?map_id=%d&all_skins=on"
 
 struct string {
   char *ptr;
