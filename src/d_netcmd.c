@@ -2115,8 +2115,11 @@ static void Got_Mapcmd(UINT8 **cp, INT32 playernum)
 
 	if (metalrecording)
 		G_BeginMetal();
+    G_RecordDemoMP();
 	if (demorecording) // Okay, level loaded, character spawned and skinned,
-		G_BeginRecording(); // I AM NOW READY TO RECORD.
+		for (int i = 0; i < MAXPLAYERS; i++)
+			if (playeringame[i] && players[i].mo && !P_MobjWasRemoved(players[i].mo))
+        		G_BeginRecording(i); // I AM NOW READY TO RECORD.
 	demo_start = true;
 }
 

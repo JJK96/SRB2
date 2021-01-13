@@ -182,6 +182,7 @@ void process_time(MYSQL *con, int playernum, int mapnum)
 // Called when the race has finished
 void speedrun_map_completed()
 {
+    return;
     // create the mysql handler
     MYSQL *con = mysql_init(NULL);
 

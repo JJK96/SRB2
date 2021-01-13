@@ -49,9 +49,13 @@ boolean demorecording;
 boolean demoplayback;
 boolean titledemo; // Title Screen demo can be cancelled by any key
 static UINT8 *demobuffer = NULL;
+static UINT8 *demobuffer_arr[MAXPLAYERS];
 static UINT8 *demo_p, *demotime_p;
+static UINT8 *demo_arr[MAXPLAYERS], *demotime_arr[MAXPLAYERS];
 static UINT8 *demoend;
+static UINT8 *demoend_arr[MAXPLAYERS];
 static UINT8 demoflags;
+static UINT8 demoflags_arr[MAXPLAYERS];
 static UINT16 demoversion;
 boolean singledemo; // quit after playing a demo from cmdline
 boolean demo_start; // don't start playing demo right away
@@ -198,6 +202,9 @@ void G_WriteDemoTiccmd(ticcmd_t *cmd, INT32 playernum)
 	char ziptic = 0;
 	UINT8 *ziptic_p;
 	(void)playernum;
+	UINT8 *demo_p = demo_arr[playernum];
+	UINT8 demoflags = demoflags_arr[playernum];
+	UINT8 *demoend = demoend_arr[playernum];
 
 	if (!demo_p)
 		return;
@@ -1384,6 +1391,31 @@ void G_RecordDemo(const char *name)
 	demorecording = true;
 }
 
+//
+// G_RecordDemo
+//
+void G_RecordDemoMP()
+{
+	for (int i = 0; i < MAXPLAYERS; i++) {
+		if (playeringame[i] && players[i].mo && !P_MobjWasRemoved(players[i].mo)) {
+        	INT32 maxsize;
+        	char *name = player_names[i];
+
+        	strcpy(demoname, name);
+        	strcat(demoname, ".lmp");
+        	maxsize = 1024*1024;
+        	if (M_CheckParm("-maxdemo") && M_IsNextParm())
+        		maxsize = atoi(M_GetNextParm()) * 1024;
+        	demo_arr[i] = NULL;
+        	demobuffer_arr[i] = malloc(maxsize);
+        	demoend_arr[i] = demobuffer_arr[i] + maxsize;
+		}
+	}
+	printf("Started recording\n");
+
+	demorecording = true;
+}
+
 void G_RecordMetal(void)
 {
 	INT32 maxsize;
@@ -1396,14 +1428,20 @@ void G_RecordMetal(void)
 	metalrecording = true;
 }
 
-void G_BeginRecording(void)
+void G_BeginRecording(INT32 playernum)
 {
+	printf("G_BeginRecording: %d\n", playernum);
 	UINT8 i;
 	char name[MAXCOLORNAME+1];
-	player_t *player = &players[consoleplayer];
+	UINT8 *demo_p = demo_arr[playernum];
+	UINT8 demoflags = demoflags_arr[playernum];
+	UINT8 *demobuffer = demobuffer_arr[playernum];
+	UINT8 *demotime_p = demotime_arr[playernum];
+	player_t *player = &players[playernum];
 
-	if (demo_p)
+	if (demo_p) {
 		return;
+	}
 	memset(name,0,sizeof(name));
 
 	demo_p = demobuffer;
@@ -1446,24 +1484,24 @@ void G_BeginRecording(void)
 	WRITEUINT32(demo_p,P_GetInitSeed());
 
 	// Name
-	for (i = 0; i < 16 && cv_playername.string[i]; i++)
-		name[i] = cv_playername.string[i];
+	for (i = 0; i < 16 && player_names[playernum][i]; i++)
+		name[i] = player_names[playernum][i];
 	for (; i < 16; i++)
 		name[i] = '\0';
 	M_Memcpy(demo_p,name,16);
 	demo_p += 16;
 
 	// Skin
-	for (i = 0; i < 16 && cv_skin.string[i]; i++)
-		name[i] = cv_skin.string[i];
+	for (i = 0; i < 16 && skins[player->skin].name[i]; i++)
+		name[i] = skins[player->skin].name[i];
 	for (; i < 16; i++)
 		name[i] = '\0';
 	M_Memcpy(demo_p,name,16);
 	demo_p += 16;
 
 	// Color
-	for (i = 0; i < MAXCOLORNAME && cv_playercolor.string[i]; i++)
-		name[i] = cv_playercolor.string[i];
+	for (i = 0; i < MAXCOLORNAME && skincolors[player->skincolor].name[i]; i++)
+		name[i] = skincolors[player->skincolor].name[i];
 	for (; i < MAXCOLORNAME; i++)
 		name[i] = '\0';
 	M_Memcpy(demo_p,name,MAXCOLORNAME);
@@ -2377,26 +2415,43 @@ static void WriteDemoChecksum(void)
 #endif
 }
 
+// Writes the demo's checksum, or just random garbage if you can't do that for some reason.
+static void WriteDemoChecksumMP(UINT8 *demobuffer, UINT8 *demo_p)
+{
+	UINT8 *p = demobuffer+16; // checksum position
+#ifdef NOMD5
+	UINT8 i;
+	for (i = 0; i < 16; i++, p++)
+		*p = P_RandomByte(); // This MD5 was chosen by fair dice roll and most likely < 50% correct.
+#else
+	md5_buffer((char *)p+16, demo_p - (p+16), p); // make a checksum of everything after the checksum in the file.
+#endif
+}
+
 // Stops recording a demo.
 static void G_StopDemoRecording(void)
 {
-	boolean saved = false;
-	if (demo_p)
-	{
+	for (int i=0;i<MAXPLAYERS;i++) {
+    	UINT8 *demo_p = demo_arr[i];
+    	UINT8 *demobuffer = demobuffer_arr[i];
+    	if (!demo_p) {
+        	printf("Skipping %d\n", i);
+        	continue;
+    	}
+    	boolean saved = false;
 		WRITEUINT8(demo_p, DEMOMARKER); // add the demo end marker
-		WriteDemoChecksum();
+		WriteDemoChecksumMP(demobuffer, demo_p);
 		saved = FIL_WriteFile(va(pandf, srb2home, demoname), demobuffer, demo_p - demobuffer); // finally output the file.
-	}
-	free(demobuffer);
-	demorecording = false;
 
-	if (modeattacking != ATTACKING_RECORD)
-	{
+    	free(demobuffer);
+
 		if (saved)
 			CONS_Printf(M_GetText("Demo %s recorded\n"), demoname);
 		else
 			CONS_Alert(CONS_WARNING, M_GetText("Demo %s not saved\n"), demoname);
 	}
+    printf("Stop recording\n");
+	demorecording = false;
 }
 
 // Stops metal sonic's demo. Separate from other functions because metal + replays can coexist

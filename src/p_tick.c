@@ -636,16 +636,17 @@ void P_Ticker(boolean run)
 
 	if (run)
 	{
-		if (demorecording)
-			G_WriteDemoTiccmd(&players[consoleplayer].cmd, 0);
 		if (demoplayback)
 			G_ReadDemoTiccmd(&players[consoleplayer].cmd, 0);
 
 		LUAh_PreThinkFrame();
 
 		for (i = 0; i < MAXPLAYERS; i++)
-			if (playeringame[i] && players[i].mo && !P_MobjWasRemoved(players[i].mo))
-				P_PlayerThink(&players[i]);
+			if (playeringame[i] && players[i].mo && !P_MobjWasRemoved(players[i].mo)) {
+        		if (demorecording)
+        			G_WriteDemoTiccmd(&players[i].cmd, i);
+    			P_PlayerThink(&players[i]);
+			}
 	}
 
 	// Keep track of how long they've been playing!
