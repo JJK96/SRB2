@@ -3,7 +3,7 @@
 On finishing a map the score is saved in the database.
 The best score per username, skin and map is kept.
 
-This data can be visualized using https://github.com/jjk96/srb2_highscores
+This data can be visualized using https://github.com/srb2circuit-eu/website
 
 ## How to run
 
